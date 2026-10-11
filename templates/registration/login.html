@@ -1,0 +1,182 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log in | Engineering Task Portal</title>
+  <style>
+    :root {
+      --green-900: #0f3d24;
+      --green-800: #14532d;
+      --green-700: #15803d;
+      --green-600: #16a34a;
+      --green-100: #dcfce7;
+      --green-50: #f0fdf4;
+      --ink: #1c2b22;
+      --muted: #5b6b61;
+      --line: #cfdcd3;
+      --danger: #b42318;
+      --danger-bg: #fef3f2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+      color: var(--ink);
+      background: #f6f9f7;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* ICON SLOTS: put an <img>, inline <svg> or emoji inside any element with class "icon-slot" */
+    .icon-slot { display: grid; place-items: center; flex-shrink: 0; overflow: hidden; line-height: 1; }
+    .icon-slot img, .icon-slot svg { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .icon-logo { width: 44px; height: 44px; border-radius: 10px; background: var(--green-600); padding: 9px; font-size: 24px; color: #fff; }
+    .icon-field { width: 18px; height: 18px; font-size: 14px; color: var(--muted); }
+
+    /* Brand panel */
+    .brand-panel {
+      background: linear-gradient(180deg, var(--green-900), var(--green-800));
+      color: #fff;
+      padding: 48px 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: 18px; text-decoration: none; color: #fff; }
+    .brand-panel h1 { font-size: 36px; line-height: 1.2; margin: 0 0 16px; letter-spacing: -0.4px; }
+    .brand-panel p { color: #c5e2cf; font-size: 17px; max-width: 420px; margin: 0; }
+    .brand-panel small { color: #a9cbb6; font-size: 14px; }
+
+    /* Form panel */
+    .form-panel { display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+    .card { width: 100%; max-width: 400px; }
+    .card h2 { font-size: 28px; margin: 0 0 6px; color: var(--green-900); letter-spacing: -0.3px; }
+    .card .sub { color: var(--muted); margin: 0 0 28px; }
+
+    .alert { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecdca; border-radius: 8px; padding: 12px 14px; font-size: 14px; margin-bottom: 20px; }
+    .alert.info { background: var(--green-50); color: var(--green-800); border-color: #bbf7d0; }
+
+    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .field { margin-bottom: 20px; }
+    .input-wrap { position: relative; display: flex; align-items: center; }
+    .input-wrap .icon-field { position: absolute; left: 14px; pointer-events: none; }
+    .input-wrap input {
+      width: 100%; padding: 12px 14px 12px 42px; font: inherit; font-size: 15px;
+      border: 1.5px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink);
+    }
+    .input-wrap input:focus { outline: none; border-color: var(--green-600); box-shadow: 0 0 0 3px rgba(22,163,74,.2); }
+    .toggle {
+      position: absolute; right: 8px; background: none; border: 0; cursor: pointer;
+      color: var(--green-700); font: inherit; font-size: 13px; font-weight: 600; padding: 6px 8px; border-radius: 6px;
+    }
+    .toggle:hover { background: var(--green-50); }
+    .toggle:focus-visible, .btn:focus-visible, .links a:focus-visible { outline: 3px solid #86efac; outline-offset: 2px; }
+    #id_password { padding-right: 64px; }
+
+    .btn {
+      width: 100%; padding: 13px 24px; border: 0; border-radius: 8px; cursor: pointer;
+      background: var(--green-700); color: #fff; font: inherit; font-size: 15px; font-weight: 600;
+    }
+    .btn:hover { background: var(--green-800); }
+
+    .links { margin-top: 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 14px; }
+    .links a { color: var(--green-700); text-decoration: none; font-weight: 600; }
+    .links a:hover { text-decoration: underline; }
+
+    @media (max-width: 820px) {
+      body { grid-template-columns: 1fr; }
+      .brand-panel { padding: 28px 24px; gap: 20px; }
+      .brand-panel h1 { font-size: 26px; margin-bottom: 8px; }
+      .brand-panel p { font-size: 15px; }
+      .brand-panel small { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="brand-panel">
+    <a class="brand" href="{% url 'home' %}">
+      <!-- ICON SLOT: logo -->
+      <span class="icon-slot icon-logo" aria-hidden="true">
+        <!-- <img src="{% static 'icons/logo.png' %}" alt=""> -->
+        &#10003;
+      </span>
+      Engineering Task Portal
+    </a>
+    <div>
+      <h1>Plan, assign and track engineering work</h1>
+      <p>Log in to see your section's tasks, update progress and keep a clear record of every change.</p>
+    </div>
+    <small>Engineering Task Portal</small>
+  </aside>
+
+  <main class="form-panel">
+    <div class="card">
+      <h2>Log in</h2>
+      <p class="sub">Enter your username and password to continue.</p>
+
+      {% if form.errors %}
+        <div class="alert" role="alert">Your username or password is incorrect. Check both and try again.</div>
+      {% endif %}
+
+      {% if next %}
+        {% if user.is_authenticated %}
+          <div class="alert" role="alert">Your account does not have access to that page. Log in with a different account to continue.</div>
+        {% else %}
+          <div class="alert info">Please log in to see that page.</div>
+        {% endif %}
+      {% endif %}
+
+      <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+
+        <div class="field">
+          <label for="id_username">Username</label>
+          <div class="input-wrap">
+            <!-- ICON SLOT: username field -->
+            <span class="icon-slot icon-field" aria-hidden="true">
+              <!-- <img src="{% static 'icons/user.png' %}" alt=""> -->
+            </span>
+            <input type="text" name="username" id="id_username" autocomplete="username" autofocus required value="{{ form.username.value|default:'' }}">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="id_password">Password</label>
+          <div class="input-wrap">
+            <!-- ICON SLOT: password field -->
+            <span class="icon-slot icon-field" aria-hidden="true">
+              <!-- <img src="{% static 'icons/lock.png' %}" alt=""> -->
+            </span>
+            <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+            <button type="button" class="toggle" id="togglePw" aria-controls="id_password">Show</button>
+          </div>
+        </div>
+
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit" class="btn">Log in</button>
+      </form>
+
+      <div class="links">
+        <a href="{% url 'home' %}">Back to home</a>
+        <a href="{% url 'admin:login' %}?next={% url 'admin:index' %}">Administrator login</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      var btn = document.getElementById('togglePw');
+      var input = document.getElementById('id_password');
+      btn.addEventListener('click', function () {
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.textContent = show ? 'Hide' : 'Show';
+      });
+    })();
+  </script>
+</body>
+</html>

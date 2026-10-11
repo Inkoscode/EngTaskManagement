@@ -1,0 +1,319 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering Task Portal</title>
+  <style>
+    :root {
+      --green-900: #0f3d24;
+      --green-800: #14532d;
+      --green-700: #15803d;
+      --green-600: #16a34a;
+      --green-100: #dcfce7;
+      --green-50: #f0fdf4;
+      --ink: #1c2b22;
+      --muted: #5b6b61;
+      --line: #dbe5de;
+      --bg: #f6f9f7;
+      --white: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+    /* ICON SLOTS: put an <img>, inline <svg> or emoji inside any element with class "icon-slot" */
+    .icon-slot { display: grid; place-items: center; flex-shrink: 0; overflow: hidden; line-height: 1; }
+    .icon-slot img, .icon-slot svg { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .icon-logo   { width: 36px; height: 36px; border-radius: 8px; background: var(--green-600); padding: 7px; font-size: 20px; color: #fff; }
+    .icon-row    { width: 40px; height: 40px; border-radius: 8px; background: var(--green-100); color: var(--green-800); padding: 8px; font-size: 20px; }
+    .icon-tile   { width: 44px; height: 44px; border-radius: 10px; background: var(--green-100); color: var(--green-800); padding: 9px; font-size: 22px; margin-bottom: 14px; }
+    .icon-role   { width: 32px; height: 32px; border-radius: 8px; background: var(--green-100); color: var(--green-800); padding: 6px; font-size: 16px; }
+    .icon-btn    { width: 20px; height: 20px; margin-right: 8px; font-size: 16px; }
+
+    /* Top bar */
+    .topbar { background: var(--green-900); color: #fff; }
+    .topbar .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 17px; text-decoration: none; }
+    .nav { display: flex; align-items: center; gap: 6px; }
+    .nav a, .nav button {
+      display: inline-flex; align-items: center;
+      color: #d6eadd; text-decoration: none; font: inherit; font-size: 14px;
+      padding: 8px 14px; border-radius: 6px; background: none; border: 0; cursor: pointer;
+    }
+    .nav a:hover, .nav button:hover { background: rgba(255,255,255,.1); color: #fff; }
+    .nav .nav-cta { background: var(--green-600); color: #fff; font-weight: 600; }
+    .nav .nav-cta:hover { background: var(--green-700); }
+    .nav form { margin: 0; }
+
+    /* Hero */
+    .hero { background: linear-gradient(180deg, var(--green-900) 0%, var(--green-800) 100%); color: #fff; padding: 72px 0 96px; }
+    .hero .wrap { display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: center; }
+    .hero h1 { font-size: 44px; line-height: 1.15; margin: 0 0 18px; letter-spacing: -0.5px; font-weight: 700; }
+    .hero p { font-size: 18px; color: #c5e2cf; max-width: 480px; margin: 0 0 32px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 13px 24px; border-radius: 8px; font-weight: 600; font-size: 15px;
+      text-decoration: none; border: 2px solid transparent; cursor: pointer;
+    }
+    .btn-primary { background: var(--green-600); color: #fff; }
+    .btn-primary:hover { background: #22b858; }
+    .btn-ghost { border-color: rgba(255,255,255,.35); color: #fff; }
+    .btn-ghost:hover { background: rgba(255,255,255,.1); }
+    .btn:focus-visible, .nav a:focus-visible, .nav button:focus-visible { outline: 3px solid #86efac; outline-offset: 3px; }
+
+    /* Sections panel */
+    .board { background: var(--white); color: var(--ink); border-radius: 12px; box-shadow: 0 24px 60px rgba(0,0,0,.28); overflow: hidden; }
+    .board-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--line); background: var(--green-50); }
+    .board-head strong { font-size: 15px; color: var(--green-800); }
+    .board-head span { font-size: 13px; color: var(--muted); }
+    .row { display: grid; grid-template-columns: 40px 1fr auto; gap: 14px; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .row:last-child { border-bottom: 0; }
+    .row b { display: block; font-size: 15px; }
+    .row small { color: var(--muted); font-size: 13px; }
+    .pill { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--green-100); color: var(--green-800); white-space: nowrap; }
+
+    /* Content blocks */
+    section.block { padding: 72px 0 0; }
+    section.block:last-of-type { padding-bottom: 72px; }
+    h2 { font-size: 28px; margin: 0 0 8px; color: var(--green-900); letter-spacing: -0.3px; }
+    .lead { color: var(--muted); max-width: 620px; margin: 0 0 32px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .tile { background: var(--white); border: 1px solid var(--line); border-top: 4px solid var(--green-600); border-radius: 8px; padding: 22px; }
+    .tile h3 { margin: 0 0 6px; font-size: 17px; color: var(--green-800); }
+    .tile p { margin: 0; color: var(--muted); font-size: 15px; }
+
+    .table-scroll { overflow-x: auto; }
+    .roles { width: 100%; border-collapse: collapse; background: var(--white); border: 1px solid var(--line); }
+    .roles th, .roles td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--line); font-size: 15px; vertical-align: middle; }
+    .roles th { background: var(--green-50); color: var(--green-800); font-weight: 600; }
+    .roles tr:last-child td { border-bottom: 0; }
+    .role-name { display: flex; align-items: center; gap: 12px; font-weight: 600; white-space: nowrap; }
+
+    footer { background: var(--green-900); color: #a9cbb6; font-size: 14px; }
+    footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 24px; padding-bottom: 24px; }
+    footer a { color: #d6eadd; text-decoration: none; margin-left: 18px; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 880px) {
+      .hero .wrap { grid-template-columns: 1fr; gap: 40px; }
+      .hero h1 { font-size: 34px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .nav a.hide-sm { display: none; }
+      .hero { padding: 48px 0 64px; }
+      .hero p { font-size: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+
+  <!--
+    HOW TO ADD ICONS
+    1. Put image files in:  static/icons/   (for example static/icons/logo.png)
+    2. In settings.py add:  STATICFILES_DIRS = [BASE_DIR / "static"]
+    3. Replace the content of any icon slot below with:
+         <img src="{% static 'icons/your-file.png' %}" alt="">
+       or paste an inline <svg>, or type an emoji.
+    Each slot is marked with a comment like: ICON SLOT: logo
+  -->
+
+  <header class="topbar">
+    <div class="wrap">
+      <a class="brand" href="{% url 'home' %}">
+        <!-- ICON SLOT: logo -->
+        <span class="icon-slot icon-logo" aria-hidden="true">
+          <!-- <img src="{% static 'icons/logo.png' %}" alt=""> -->
+          &#10003;
+        </span>
+        Engineering Task Portal
+      </a>
+      <nav class="nav" aria-label="Main navigation">
+        {% if user.is_authenticated %}
+          <a href="{% url 'task_list' %}">Tasks</a>
+          {% if user.is_staff %}<a class="hide-sm" href="{% url 'admin:index' %}">Administration</a>{% endif %}
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Log out</button></form>
+        {% else %}
+          <a class="hide-sm" href="#sections">Sections</a>
+          <a class="hide-sm" href="#roles">Roles</a>
+          <a class="hide-sm" href="{% url 'admin:login' %}?next={% url 'admin:index' %}">Administrator login</a>
+          <a class="nav-cta" href="{% url 'login' %}">Log in</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <h1>Plan, assign and track engineering work in one place</h1>
+          <p>Every task has an owner, a status and a history. Each section sees its own work, and managers see the whole picture.</p>
+          <div class="actions">
+            {% if user.is_authenticated %}
+              <a class="btn btn-primary" href="{% url 'task_list' %}">
+                <!-- ICON SLOT: tasks button -->
+                <span class="icon-slot icon-btn" aria-hidden="true"></span>Open my tasks
+              </a>
+              {% if user.is_staff %}
+              <a class="btn btn-ghost" href="{% url 'admin:index' %}">
+                <!-- ICON SLOT: administration button -->
+                <span class="icon-slot icon-btn" aria-hidden="true"></span>Administration
+              </a>
+              {% endif %}
+            {% else %}
+              <a class="btn btn-primary" href="{% url 'login' %}">
+                <!-- ICON SLOT: login button -->
+                <span class="icon-slot icon-btn" aria-hidden="true"></span>Log in
+              </a>
+              <a class="btn btn-ghost" href="{% url 'admin:login' %}?next={% url 'admin:index' %}">
+                <!-- ICON SLOT: administrator login button -->
+                <span class="icon-slot icon-btn" aria-hidden="true"></span>Administrator login
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="board" id="sections" aria-label="Engineering sections">
+          <div class="board-head"><strong>Engineering sections</strong><span>4 teams</span></div>
+
+          <div class="row">
+            <!-- ICON SLOT: Applications and VAS -->
+            <span class="icon-slot icon-row" aria-hidden="true">
+              <!-- <img src="{% static 'icons/applications.png' %}" alt=""> -->
+              A
+            </span>
+            <div><b>Applications and VAS</b><small>Applications and value added services</small></div>
+            <span class="pill">Team</span>
+          </div>
+
+          <div class="row">
+            <!-- ICON SLOT: PS Core -->
+            <span class="icon-slot icon-row" aria-hidden="true">
+              <!-- <img src="{% static 'icons/ps-core.png' %}" alt=""> -->
+              PS
+            </span>
+            <div><b>PS Core</b><small>Packet switched core</small></div>
+            <span class="pill">Team</span>
+          </div>
+
+          <div class="row">
+            <!-- ICON SLOT: IP Core -->
+            <span class="icon-slot icon-row" aria-hidden="true">
+              <!-- <img src="{% static 'icons/ip-core.png' %}" alt=""> -->
+              IP
+            </span>
+            <div><b>IP Core</b><small>IP core network</small></div>
+            <span class="pill">Team</span>
+          </div>
+
+          <div class="row">
+            <!-- ICON SLOT: CS Core -->
+            <span class="icon-slot icon-row" aria-hidden="true">
+              <!-- <img src="{% static 'icons/cs-core.png' %}" alt=""> -->
+              CS
+            </span>
+            <div><b>CS Core</b><small>Circuit switched core</small></div>
+            <span class="pill">Team</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <h2>What the portal does</h2>
+        <p class="lead">Built for engineering teams that need clear ownership and a record of every change.</p>
+        <div class="grid">
+          <div class="tile">
+            <!-- ICON SLOT: task tracking -->
+            <span class="icon-slot icon-tile" aria-hidden="true">
+              <!-- <img src="{% static 'icons/tracking.png' %}" alt=""> -->
+            </span>
+            <h3>Task tracking</h3>
+            <p>Set priority, status, planned start and finish, due date and the system each task relates to.</p>
+          </div>
+          <div class="tile">
+            <!-- ICON SLOT: clear ownership -->
+            <span class="icon-slot icon-tile" aria-hidden="true">
+              <!-- <img src="{% static 'icons/ownership.png' %}" alt=""> -->
+            </span>
+            <h3>Clear ownership</h3>
+            <p>Every task belongs to one section and can be assigned to a member of that section.</p>
+          </div>
+          <div class="tile">
+            <!-- ICON SLOT: full history -->
+            <span class="icon-slot icon-tile" aria-hidden="true">
+              <!-- <img src="{% static 'icons/history.png' %}" alt=""> -->
+            </span>
+            <h3>Full history</h3>
+            <p>Each status or date change is recorded with who made it and when.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="roles">
+      <div class="wrap">
+        <h2>Who can do what</h2>
+        <p class="lead">Access follows each person's role, so teams only see and change what they should.</p>
+        <div class="table-scroll">
+          <table class="roles">
+            <tr><th>Role</th><th>Access</th></tr>
+            <tr>
+              <td><div class="role-name">
+                <!-- ICON SLOT: overall boss -->
+                <span class="icon-slot icon-role" aria-hidden="true"></span>Overall boss
+              </div></td>
+              <td>Views and edits tasks in every section.</td>
+            </tr>
+            <tr>
+              <td><div class="role-name">
+                <!-- ICON SLOT: team boss -->
+                <span class="icon-slot icon-role" aria-hidden="true"></span>Team boss
+              </div></td>
+              <td>Creates, edits and assigns tasks for their own section.</td>
+            </tr>
+            <tr>
+              <td><div class="role-name">
+                <!-- ICON SLOT: engineer -->
+                <span class="icon-slot icon-role" aria-hidden="true"></span>Engineer
+              </div></td>
+              <td>Sees their section's tasks, updates the status of tasks assigned to them, and adds comments and private notes.</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>Engineering Task Portal</span>
+      <span>
+        {% if user.is_authenticated %}
+          <a href="{% url 'task_list' %}">Tasks</a>
+          {% if user.is_staff %}<a href="{% url 'admin:index' %}">Administration</a>{% endif %}
+        {% else %}
+          <a href="{% url 'login' %}">Log in</a>
+          <a href="{% url 'admin:login' %}?next={% url 'admin:index' %}">Administrator login</a>
+        {% endif %}
+      </span>
+    </div>
+  </footer>
+
+</body>
+</html>
