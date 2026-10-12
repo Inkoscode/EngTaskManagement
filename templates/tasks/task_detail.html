@@ -1,0 +1,76 @@
+{% extends "tasks/layout.html" %}
+{% block title %}{{ task.title }} · Task portal{% endblock %}
+{% block content %}
+<div class="row spread">
+  <h1>{{ task.title }}</h1>
+  <div class="row">
+    {% if can_edit %}<a class="btn" href="{% url 'task_edit' task.pk %}">Edit task</a>{% endif %}
+    <a class="btn" href="{% url 'task_list' %}">Back to all teams</a>
+  </div>
+</div>
+
+<div class="card">
+  <dl class="grid2">
+    <div><dt>Team</dt><dd>{{ task.owning_section.name }}</dd></div>
+    <div><dt>Assignee</dt><dd>{% if task.assignee %}{{ task.assignee.get_full_name|default:task.assignee.username }}{% else %}Unassigned{% endif %}</dd></div>
+    <div><dt>Created by</dt><dd>{{ task.creator.get_full_name|default:task.creator.username }}, {{ task.created_at|date:"j M Y" }}</dd></div>
+    <div><dt>Priority</dt><dd><span class="badge p-{{ task.priority }}">{{ task.get_priority_display }}</span></dd></div>
+    <div><dt>Status</dt><dd><span class="badge s-{{ task.status }}">{{ task.get_status_display }}</span></dd></div>
+    <div><dt>Due</dt><dd>{% if task.due_date %}<span {% if task.due_date < today and task.status != 'done' %}class="overdue"{% endif %}>{{ task.due_date|date:"j M Y" }}</span>{% else %}None{% endif %}</dd></div>
+    <div><dt>Planned start</dt><dd>{{ task.planned_start|date:"j M Y"|default:"None" }}</dd></div>
+    <div><dt>Planned finish</dt><dd>{{ task.planned_finish|date:"j M Y"|default:"None" }}</dd></div>
+    <div><dt>System reference</dt><dd>{{ task.system_ref|default:"None" }}</dd></div>
+  </dl>
+  {% if task.description %}<p style="white-space:pre-wrap">{{ task.description }}</p>{% endif %}
+
+  {% if can_status %}
+  <form class="row" method="post" action="{% url 'task_status' task.pk %}">
+    {% csrf_token %}
+    <label for="id_status">Change status</label>
+    {{ status_form.status }}
+    <button class="btn primary" type="submit">Update status</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if involved %}
+  <h2>Comments</h2>
+  <div class="card">
+    {% for c in comments %}
+      <div class="thread"><b>{{ c.author.get_full_name|default:c.author.username }}</b> <span class="muted">{{ c.created_at|date:"j M Y, H:i" }}</span>
+      <div style="white-space:pre-wrap">{{ c.body }}</div></div>
+    {% empty %}<p class="muted">No comments yet.</p>{% endfor %}
+    <form method="post" action="{% url 'add_comment' task.pk %}">
+      {% csrf_token %}{{ comment_form.body }}
+      <p><button class="btn primary" type="submit">Post comment</button></p>
+    </form>
+  </div>
+
+  <h2>My private notes</h2>
+  <div class="card">
+    <p class="muted">Only you can see these.</p>
+    {% for n in notes %}
+      <div class="thread"><span class="muted">{{ n.created_at|date:"j M Y, H:i" }}</span>
+      <div style="white-space:pre-wrap">{{ n.body }}</div></div>
+    {% endfor %}
+    <form method="post" action="{% url 'add_private_note' task.pk %}">
+      {% csrf_token %}{{ note_form.body }}
+      <p><button class="btn" type="submit">Save note</button></p>
+    </form>
+  </div>
+
+  <h2>History</h2>
+  <div class="tablewrap"><table class="tbl stack">
+    <thead><tr><th>When</th><th>Who</th><th>What changed</th></tr></thead>
+    <tbody>
+    {% for e in events %}
+      <tr><td data-label="When">{{ e.at|date:"j M Y, H:i" }}</td>
+      <td data-label="Who">{{ e.actor.get_full_name|default:e.actor.username|default:"Removed user" }}</td>
+      <td data-label="Change">{% if e.field == 'created' %}Created the task{% else %}{{ e.field }}: {{ e.old_value|default:"empty" }} to {{ e.new_value|default:"empty" }}{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="3" class="muted">No history yet.</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+{% else %}
+  <p class="muted" style="margin-top:1rem">This task belongs to another team, so you can view it but not comment on it.</p>
+{% endif %}
+{% endblock %}

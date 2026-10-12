@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Comment, Membership, PrivateNote, Task, TaskEvent
+from .models import Comment, EmailLog, Membership, Task, TaskEvent, WeeklyReport
 
 
 @admin.register(Membership)
@@ -26,6 +26,31 @@ class TaskEventAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
+    def has_delete_permission(self, request, obj=None):
+        return False  # the audit log should be tamper-resistant
+
 
 admin.site.register(Comment)
 # PrivateNote is intentionally NOT registered, so admins can't browse private notes casually.
+
+
+@admin.register(EmailLog)
+class EmailLogAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "kind", "recipient", "subject", "ok")
+    list_filter = ("kind", "ok")
+    search_fields = ("recipient", "subject", "error")
+    readonly_fields = [f.name for f in EmailLog._meta.fields]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(WeeklyReport)
+class WeeklyReportAdmin(admin.ModelAdmin):
+    list_display = ("subject", "week_start", "status", "recipient_count", "failed_count", "sent_at")
+    list_filter = ("status",)
+    readonly_fields = ("data", "status", "sent_at", "sent_by", "recipient_count", "failed_count", "created_by")
+    # Reports are reviewed and sent from the portal's Reports page, not from here.

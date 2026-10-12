@@ -1,0 +1,52 @@
+{% extends "tasks/layout.html" %}
+{% block title %}My dashboard · Task portal{% endblock %}
+{% block content %}
+<div class="row spread">
+  <div>
+    <h1>My dashboard</h1>
+    <p class="muted" style="margin-top:-.6rem">
+      {% for s in my_sections %}{{ s.name }}{% if not forloop.last %}, {% endif %}{% empty %}You are not in a team yet. Ask an admin to add you.{% endfor %}
+    </p>
+  </div>
+  {% if can_create %}<a class="btn primary" href="{% url 'task_create' %}">New task</a>{% endif %}
+</div>
+
+<div class="stats">
+  <div class="card stat"><b>{{ assigned|length }}</b><span class="muted">Assigned to me</span></div>
+  <div class="card stat"><b>{{ team_open }}</b><span class="muted">Open in my team</span></div>
+  <div class="card stat"><b>{{ team_blocked }}</b><span class="muted">Blocked</span></div>
+  <div class="card stat"><b class="{% if team_overdue %}overdue{% endif %}">{{ team_overdue }}</b><span class="muted">Overdue</span></div>
+</div>
+
+<h2>Assigned to me</h2>
+{% include "tasks/_task_table.html" with rows=assigned %}
+
+<h2>Team board</h2>
+<div class="board">
+  {% for key, label, items in columns %}
+  <section class="col" aria-label="{{ label }}">
+    <h3><span>{{ label }}</span><span class="muted">{{ items|length }}</span></h3>
+    {% for t in items %}
+    <article class="tcard">
+      <a class="t" href="{% url 'task_detail' t.pk %}">{{ t.title }}</a>
+      <div class="meta">
+        <span class="badge p-{{ t.priority }}">{{ t.get_priority_display }}</span>
+        {% if t.due_date %}<span {% if t.due_date < today and t.status != 'done' %}class="overdue"{% else %}class="muted"{% endif %}>Due {{ t.due_date|date:"j M" }}</span>{% endif %}
+      </div>
+      <div class="muted">{{ t.owning_section.name }} · {% if t.assignee %}{{ t.assignee.get_full_name|default:t.assignee.username }}{% else %}Unassigned{% endif %}</div>
+      {% if t.can_status %}
+      <form method="post" action="{% url 'task_status' t.pk %}" style="margin-top:.4rem">
+        {% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+        <select name="status" aria-label="Status for {{ t.title }}" onchange="this.form.submit()">
+          {% for v, l in status_choices %}<option value="{{ v }}" {% if v == t.status %}selected{% endif %}>{{ l }}</option>{% endfor %}
+        </select>
+        <noscript><button class="btn" type="submit">Save</button></noscript>
+      </form>
+      {% endif %}
+    </article>
+    {% empty %}<p class="muted">Nothing here.</p>{% endfor %}
+    {% if key == 'done' %}<p class="muted">Showing the 10 most recent.</p>{% endif %}
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

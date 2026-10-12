@@ -1,0 +1,27 @@
+<h1 style="font-size:22px;margin:0 0 14px;color:#0f3d24;line-height:1.25">{{ report.subject }}</h1>
+{% if report.intro %}<p style="margin:0 0 20px;line-height:1.55">{{ report.intro|linebreaksbr }}</p>{% endif %}
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="6" style="margin:0 0 8px"><tr>
+  <td align="center" style="background:#f0fdf4;border-radius:6px;padding:10px 4px"><div style="font-size:22px;font-weight:700;color:#14532d">{{ data.totals.created }}</div><div style="font-size:12px;color:#5b6b61">Created</div></td>
+  <td align="center" style="background:#f0fdf4;border-radius:6px;padding:10px 4px"><div style="font-size:22px;font-weight:700;color:#14532d">{{ data.totals.completed }}</div><div style="font-size:12px;color:#5b6b61">Completed</div></td>
+  <td align="center" style="background:#f0fdf4;border-radius:6px;padding:10px 4px"><div style="font-size:22px;font-weight:700;color:#14532d">{{ data.totals.open }}</div><div style="font-size:12px;color:#5b6b61">Open</div></td>
+  <td align="center" style="background:#f0fdf4;border-radius:6px;padding:10px 4px"><div style="font-size:22px;font-weight:700;color:#b42318">{{ data.totals.blocked }}</div><div style="font-size:12px;color:#5b6b61">Blocked</div></td>
+  <td align="center" style="background:#f0fdf4;border-radius:6px;padding:10px 4px"><div style="font-size:22px;font-weight:700;color:#b42318">{{ data.totals.overdue }}</div><div style="font-size:12px;color:#5b6b61">Overdue</div></td>
+</tr></table>
+
+{% if personal %}
+<h2 style="font-size:17px;margin:24px 0 6px;color:#0f3d24">Your tasks: {{ personal.total }} open{% if personal.overdue %}, {{ personal.overdue }} overdue{% endif %}</h2>
+<ul style="margin:0 0 8px;padding-left:20px;font-size:14px;line-height:1.6">
+{% for i in personal.items %}<li><a href="{{ site_url }}{{ i.path }}" style="color:#15803d">{{ i.title }}</a> <span style="color:#5b6b61">{{ i.team }}{% if i.due %}, due {{ i.due }}{% endif %}</span>{% if i.overdue %} <b style="color:#b42318">overdue</b>{% endif %}</li>
+{% endfor %}</ul>
+{% if personal.more %}<p style="margin:0;font-size:13px;color:#5b6b61">and {{ personal.more }} more</p>{% endif %}
+{% endif %}
+
+{% for team in data.teams %}
+<h2 style="font-size:17px;margin:26px 0 4px;color:#0f3d24;border-top:1px solid #dbe5de;padding-top:14px">{{ team.name }}</h2>
+<p style="margin:0 0 4px;font-size:14px;color:#5b6b61">{{ team.created }} created this week, {{ team.completed.total }} completed, {{ team.open }} open</p>
+{% include "emails/_task_list.html" with title="Completed this week" block=team.completed %}
+{% include "emails/_task_list.html" with title="Blocked" block=team.blocked %}
+{% include "emails/_task_list.html" with title="Overdue" block=team.overdue %}
+{% include "emails/_task_list.html" with title="Due in the next 7 days" block=team.upcoming %}
+{% endfor %}

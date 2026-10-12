@@ -1,0 +1,21 @@
+{% extends "tasks/layout.html" %}
+{% block title %}{{ title }} · Task portal{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+<form method="post" class="card" novalidate>
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  {% for field in form %}
+    <div class="field">
+      {{ field.label_tag }}
+      {{ field }}
+      {% if field.help_text %}<div class="muted">{{ field.help_text }}</div>{% endif %}
+      {{ field.errors }}
+    </div>
+  {% endfor %}
+  <div class="row">
+    <button class="btn primary" type="submit">Save task</button>
+    <a class="btn" href="{% if form.instance.pk %}{% url 'task_detail' form.instance.pk %}{% else %}{% url 'my_dashboard' %}{% endif %}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,11 +1,10 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Engineering Task Portal</title>
+  <title>Core Networks Task Management</title>
   <style>
     :root {
       --green-900: #0f3d24;
@@ -39,12 +38,25 @@
     .icon-row    { width: 40px; height: 40px; border-radius: 8px; background: var(--green-100); color: var(--green-800); padding: 8px; font-size: 20px; }
     .icon-tile   { width: 44px; height: 44px; border-radius: 10px; background: var(--green-100); color: var(--green-800); padding: 9px; font-size: 22px; margin-bottom: 14px; }
     .icon-role   { width: 32px; height: 32px; border-radius: 8px; background: var(--green-100); color: var(--green-800); padding: 6px; font-size: 16px; }
-    .icon-btn    { width: 20px; height: 20px; margin-right: 8px; font-size: 16px; }
+
+    /* Logo */
+    .brand-logo { height: 36px; width: auto; max-width: 180px; object-fit: contain; display: block; border-radius: 6px; }
+
+    /* Other systems */
+    .sys-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+    a.sys { display: flex; gap: 14px; align-items: flex-start; text-decoration: none; color: inherit; background: var(--white); border: 1px solid var(--line); border-top: 4px solid var(--green-600); border-radius: 8px; padding: 18px; }
+    a.sys:hover { background: var(--green-50); }
+    a.sys:focus-visible { outline: 3px solid var(--green-600); outline-offset: 3px; }
+    .icon-sys { width: 44px; height: 44px; border-radius: 10px; background: var(--green-100); color: var(--green-800); font-weight: 700; font-size: 20px; padding: 6px; }
+    .sys h3 { margin: 0 0 2px; font-size: 16px; color: var(--green-800); }
+    .sys p { margin: 0; color: var(--muted); font-size: 14px; }
+    .sys .go { margin-left: auto; color: var(--green-700); font-size: 18px; line-height: 1.2; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
     /* Top bar */
     .topbar { background: var(--green-900); color: #fff; }
     .topbar .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
-    .brand { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 17px; text-decoration: none; }
+    .brand { display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: 22px; text-decoration: none; }
     .nav { display: flex; align-items: center; gap: 6px; }
     .nav a, .nav button {
       display: inline-flex; align-items: center;
@@ -113,6 +125,12 @@
     }
     @media (max-width: 560px) {
       .nav a.hide-sm { display: none; }
+      .brand { font-size: 18px; }
+      .topbar .wrap { height: auto; min-height: 64px; flex-wrap: wrap; gap: 6px; padding-top: 8px; padding-bottom: 8px; }
+      .nav { flex-wrap: wrap; }
+      .actions .btn { width: 100%; }
+      footer .wrap { flex-direction: column; }
+      footer a { margin: 0 18px 0 0; }
       .hero { padding: 48px 0 64px; }
       .hero p { font-size: 16px; }
     }
@@ -134,20 +152,19 @@
   <header class="topbar">
     <div class="wrap">
       <a class="brand" href="{% url 'home' %}">
-        <!-- ICON SLOT: logo -->
-        <span class="icon-slot icon-logo" aria-hidden="true">
-          <!-- <img src="{% static 'icons/logo.png' %}" alt=""> -->
-          &#10003;
-        </span>
-        Engineering Task Portal
+        <!-- LOGO: replace static/icons/logo.png with your own file. If yours is a PNG, change the name below. -->
+        <img class="brand-logo" src="{% static 'icons/logo.png' %}" alt="">
+        Core Networks Task Management
       </a>
       <nav class="nav" aria-label="Main navigation">
         {% if user.is_authenticated %}
-          <a href="{% url 'task_list' %}">Tasks</a>
+          <a href="{% url 'task_list' %}">All teams</a>
+          <a href="{% url 'my_dashboard' %}">My dashboard</a>
           {% if user.is_staff %}<a class="hide-sm" href="{% url 'admin:index' %}">Administration</a>{% endif %}
           <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Log out</button></form>
         {% else %}
           <a class="hide-sm" href="#sections">Sections</a>
+          {% if systems %}<a class="hide-sm" href="#systems">Systems</a>{% endif %}
           <a class="hide-sm" href="#roles">Roles</a>
           <a class="hide-sm" href="{% url 'admin:login' %}?next={% url 'admin:index' %}">Administrator login</a>
           <a class="nav-cta" href="{% url 'login' %}">Log in</a>
@@ -161,27 +178,26 @@
       <div class="wrap">
         <div>
           <h1>Plan, assign and track engineering work in one place</h1>
-          <p>Every task has an owner, a status and a history. Each section sees its own work, and managers see the whole picture.</p>
+          <p>Every team sees the full picture on one dashboard, and each team manages its own work.</p>
           <div class="actions">
             {% if user.is_authenticated %}
-              <a class="btn btn-primary" href="{% url 'task_list' %}">
-                <!-- ICON SLOT: tasks button -->
-                <span class="icon-slot icon-btn" aria-hidden="true"></span>Open my tasks
+              <a class="btn btn-primary" href="{% url 'my_dashboard' %}">
+                Open my dashboard
+              </a>
+              <a class="btn btn-ghost" href="{% url 'task_list' %}">
+                All teams
               </a>
               {% if user.is_staff %}
               <a class="btn btn-ghost" href="{% url 'admin:index' %}">
-                <!-- ICON SLOT: administration button -->
-                <span class="icon-slot icon-btn" aria-hidden="true"></span>Administration
+                Administration
               </a>
               {% endif %}
             {% else %}
               <a class="btn btn-primary" href="{% url 'login' %}">
-                <!-- ICON SLOT: login button -->
-                <span class="icon-slot icon-btn" aria-hidden="true"></span>Log in
+                Log in
               </a>
               <a class="btn btn-ghost" href="{% url 'admin:login' %}?next={% url 'admin:index' %}">
-                <!-- ICON SLOT: administrator login button -->
-                <span class="icon-slot icon-btn" aria-hidden="true"></span>Administrator login
+                Administrator login
               </a>
             {% endif %}
           </div>
@@ -233,6 +249,27 @@
       </div>
     </section>
 
+    {% if systems %}
+    <section class="block" id="systems">
+      <div class="wrap">
+        <h2>Other systems</h2>
+        <p class="lead">Quick links to the other tools your teams use. Each one opens in a new tab.</p>
+        <div class="sys-grid">
+          {% for s in systems %}
+          <a class="sys" href="{{ s.url }}" target="_blank" rel="noopener noreferrer">
+            <span class="icon-slot icon-sys" aria-hidden="true">{% if s.icon %}<img src="{% static s.icon %}" alt="">{% else %}{{ s.name|slice:":1"|upper }}{% endif %}</span>
+            <div>
+              <h3>{{ s.name }}<span class="sr"> (opens in a new tab)</span></h3>
+              {% if s.description %}<p>{{ s.description }}</p>{% endif %}
+            </div>
+            <span class="go" aria-hidden="true">&#8599;</span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
     <section class="block">
       <div class="wrap">
         <h2>What the portal does</h2>
@@ -269,7 +306,7 @@
     <section class="block" id="roles">
       <div class="wrap">
         <h2>Who can do what</h2>
-        <p class="lead">Access follows each person's role, so teams only see and change what they should.</p>
+        <p class="lead">Everyone can see all teams' tasks. What you can change depends on your role.</p>
         <div class="table-scroll">
           <table class="roles">
             <tr><th>Role</th><th>Access</th></tr>
@@ -278,21 +315,21 @@
                 <!-- ICON SLOT: overall boss -->
                 <span class="icon-slot icon-role" aria-hidden="true"></span>Overall boss
               </div></td>
-              <td>Views and edits tasks in every section.</td>
+              <td>Sees every team's tasks, and edits and assigns tasks in any section.</td>
             </tr>
             <tr>
               <td><div class="role-name">
                 <!-- ICON SLOT: team boss -->
                 <span class="icon-slot icon-role" aria-hidden="true"></span>Team boss
               </div></td>
-              <td>Creates, edits and assigns tasks for their own section.</td>
+              <td>Edits and reassigns any task in their own section.</td>
             </tr>
             <tr>
               <td><div class="role-name">
                 <!-- ICON SLOT: engineer -->
                 <span class="icon-slot icon-role" aria-hidden="true"></span>Engineer
               </div></td>
-              <td>Sees their section's tasks, updates the status of tasks assigned to them, and adds comments and private notes.</td>
+              <td>Creates tasks in their section and assigns them to teammates, edits the tasks they created, updates the status of tasks assigned to them, and adds comments and private notes.</td>
             </tr>
           </table>
         </div>
@@ -302,10 +339,11 @@
 
   <footer>
     <div class="wrap">
-      <span>Engineering Task Portal</span>
+      <span>Core Networks Task Management</span>
       <span>
         {% if user.is_authenticated %}
-          <a href="{% url 'task_list' %}">Tasks</a>
+          <a href="{% url 'task_list' %}">All teams</a>
+          <a href="{% url 'my_dashboard' %}">My dashboard</a>
           {% if user.is_staff %}<a href="{% url 'admin:index' %}">Administration</a>{% endif %}
         {% else %}
           <a href="{% url 'login' %}">Log in</a>

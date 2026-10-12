@@ -1,0 +1,4 @@
+Add this line to the file named .gitignore in your project folder (next to manage.py),
+BEFORE you run "git add":
+
+core_portal/email_settings.py

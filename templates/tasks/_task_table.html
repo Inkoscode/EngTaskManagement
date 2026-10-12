@@ -1,0 +1,19 @@
+<div class="tablewrap">
+<table class="tbl stack">
+  <thead><tr><th>Task</th><th>Team</th><th>Assignee</th><th>Priority</th><th>Status</th><th>Due</th></tr></thead>
+  <tbody>
+  {% for t in rows %}
+    <tr>
+      <td data-label="Task"><span><a href="{% url 'task_detail' t.pk %}">{{ t.title }}</a>{% if t.system_ref %}<span class="muted" style="display:block">{{ t.system_ref }}</span>{% endif %}</span></td>
+      <td data-label="Team">{{ t.owning_section.name }}</td>
+      <td data-label="Assignee">{% if t.assignee %}{{ t.assignee.get_full_name|default:t.assignee.username }}{% else %}<span class="muted">Unassigned</span>{% endif %}</td>
+      <td data-label="Priority"><span class="badge p-{{ t.priority }}">{{ t.get_priority_display }}</span></td>
+      <td data-label="Status"><span class="badge s-{{ t.status }}">{{ t.get_status_display }}</span></td>
+      <td data-label="Due">{% if t.due_date %}<span {% if t.due_date < today and t.status != 'done' %}class="overdue"{% endif %}>{{ t.due_date|date:"j M Y" }}</span>{% else %}<span class="muted">None</span>{% endif %}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6" class="muted">No tasks match.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>

@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from sections.models import Section
-from django.conf import settings
+
 
 class Membership(models.Model):
     ENGINEER = "engineer"
@@ -29,6 +29,8 @@ class Task(models.Model):
         ("review", "In review"),
         ("done", "Done"),
     ]
+    # Everything that is not finished. Used for "open" counts and overdue checks.
+    OPEN_STATUSES = ["todo", "in_progress", "blocked", "review"]
 
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -87,8 +89,56 @@ class TaskEvent(models.Model):
     class Meta:
         ordering = ["-at"]
 
-creator = models.ForeignKey(
-    settings.AUTH_USER_MODEL,
-    on_delete=models.PROTECT,
-    related_name="created_tasks",
-)
+
+class WeeklyReport(models.Model):
+    """A weekly summary. Starts as a draft; an admin reviews it and sends it to everyone."""
+    DRAFT = "draft"
+    SENT = "sent"
+    STATUS_CHOICES = [(DRAFT, "Draft"), (SENT, "Sent")]
+
+    week_start = models.DateField(unique=True)  # always a Monday
+    week_end = models.DateField()
+    subject = models.CharField(max_length=200)
+    intro = models.TextField(blank=True, help_text="A short message shown at the top of the email.")
+    data = models.JSONField(default=dict, blank=True)  # snapshot of the numbers shown in the preview
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=DRAFT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                   on_delete=models.SET_NULL, related_name="+")
+    sent_at = models.DateTimeField(null=True, blank=True)
+    sent_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                on_delete=models.SET_NULL, related_name="+")
+    recipient_count = models.PositiveIntegerField(default=0)
+    failed_count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["-week_start"]
+
+    def __str__(self):
+        return self.subject
+
+
+class EmailLog(models.Model):
+    """One row per email the portal tried to send, so failures are visible."""
+    ASSIGNMENT = "assignment"
+    WEEKLY = "weekly"
+    TEST = "weekly_test"
+    DRAFT_READY = "draft_ready"
+    KIND_CHOICES = [(ASSIGNMENT, "Task assigned"), (WEEKLY, "Weekly report"),
+                    (TEST, "Weekly report test"), (DRAFT_READY, "Draft ready")]
+
+    kind = models.CharField(max_length=20, choices=KIND_CHOICES)
+    recipient = models.CharField(max_length=254)
+    subject = models.CharField(max_length=255)
+    ok = models.BooleanField(default=True)
+    error = models.TextField(blank=True)
+    task = models.ForeignKey(Task, null=True, blank=True, on_delete=models.SET_NULL, related_name="email_logs")
+    report = models.ForeignKey(WeeklyReport, null=True, blank=True, on_delete=models.SET_NULL,
+                               related_name="email_logs")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self):
+        return f"{self.get_kind_display()} to {self.recipient} ({'ok' if self.ok else 'failed'})"

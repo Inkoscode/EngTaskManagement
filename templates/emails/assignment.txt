@@ -1,0 +1,21 @@
+{% autoescape off %}Hello {{ assignee.get_full_name|default:assignee.username }},
+
+{{ actor_name }} assigned a task to you.
+
+Task: {{ task.title }}
+Team: {{ task.owning_section.name }}
+Priority: {{ task.get_priority_display }}
+Status: {{ task.get_status_display }}
+Due: {% if task.due_date %}{{ task.due_date|date:"j M Y" }}{% else %}Not set{% endif %}
+{% if task.system_ref %}System reference: {{ task.system_ref }}
+{% endif %}{% if task.description %}
+{{ task.description|truncatechars:600 }}
+{% endif %}
+Open the task:
+{{ task_url }}
+
+Your dashboard:
+{{ dashboard_url }}
+
+You are receiving this because you were assigned a task in the Engineering Task Portal.
+{% endautoescape %}

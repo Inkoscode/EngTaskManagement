@@ -1,0 +1,35 @@
+{% extends "tasks/layout.html" %}
+{% block title %}Weekly reports · Engineering Task Portal{% endblock %}
+{% block content %}
+<h1>Weekly reports</h1>
+<p class="muted" style="max-width:640px">Create a draft for any week, check the preview, edit the message at the top, then send it to everyone. Nothing is emailed until you press Send.</p>
+
+<div class="card">
+  <form class="filters" method="post" action="{% url 'report_generate' %}" style="margin:0">
+    {% csrf_token %}
+    <div><label class="muted" for="week_of">Week containing</label><br><input id="week_of" type="date" name="week_of" value="{{ today }}"></div>
+    <button class="btn primary" type="submit">Create or refresh draft</button>
+  </form>
+  {% if this_week %}<p class="muted" style="margin:.6rem 0 0">This week's report is already <a href="{% url 'report_detail' this_week.pk %}">{{ this_week.get_status_display|lower }}</a>.</p>{% endif %}
+</div>
+
+<h2>All reports</h2>
+<div class="tablewrap">
+<table class="tbl stack">
+  <thead><tr><th>Report</th><th>Week</th><th>Status</th><th>Sent</th><th>Delivered</th></tr></thead>
+  <tbody>
+  {% for r in reports %}
+    <tr>
+      <td data-label="Report"><a href="{% url 'report_detail' r.pk %}">{{ r.subject }}</a></td>
+      <td data-label="Week">{{ r.week_start|date:"j M" }} to {{ r.week_end|date:"j M Y" }}</td>
+      <td data-label="Status"><span class="badge {% if r.status == 'sent' %}s-done{% else %}s-review{% endif %}">{{ r.get_status_display }}</span></td>
+      <td data-label="Sent">{% if r.sent_at %}{{ r.sent_at|date:"j M Y, H:i" }}{% if r.sent_by %} by {{ r.sent_by.get_full_name|default:r.sent_by.username }}{% endif %}{% else %}<span class="muted">Not sent</span>{% endif %}</td>
+      <td data-label="Delivered">{% if r.status == 'sent' %}{{ r.recipient_count }}{% if r.failed_count %} <span class="overdue">({{ r.failed_count }} failed)</span>{% endif %}{% else %}<span class="muted">None</span>{% endif %}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="5" class="muted">No reports yet. Create the first draft above.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

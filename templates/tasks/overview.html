@@ -1,0 +1,53 @@
+{% extends "tasks/layout.html" %}
+{% block title %}All teams · Task portal{% endblock %}
+{% block content %}
+<div class="row spread">
+  <h1>All teams</h1>
+  {% if user.is_overall_boss or user.memberships.exists %}<a class="btn primary" href="{% url 'task_create' %}">New task</a>{% endif %}
+</div>
+
+<div class="stats">
+  <div class="card stat"><b>{{ stats.open_count }}</b><span class="muted">Open</span></div>
+  <div class="card stat"><b>{{ stats.blocked }}</b><span class="muted">Blocked</span></div>
+  <div class="card stat"><b class="{% if stats.overdue %}overdue{% endif %}">{{ stats.overdue }}</b><span class="muted">Overdue</span></div>
+  <div class="card stat"><b>{{ stats.done }}</b><span class="muted">Done</span></div>
+</div>
+
+<h2>Teams</h2>
+<div class="teams">
+  {% for s in sections %}
+  <a class="card {% if filters.section == s.pk|stringformat:'s' %}on{% endif %}" href="?section={{ s.pk }}">
+    <b>{{ s.name }}</b>
+    <div class="n"><span>{{ s.open_count }} open</span><span>{{ s.blocked }} blocked</span><span {% if s.overdue %}class="overdue"{% endif %}>{{ s.overdue }} overdue</span></div>
+  </a>
+  {% empty %}<p class="muted">No teams yet. Add them in the admin.</p>{% endfor %}
+</div>
+
+<h2>Tasks</h2>
+<form class="filters" method="get">
+  <div><label class="muted" for="q">Search</label><br><input id="q" name="q" value="{{ filters.q }}" placeholder="Title or system ref"></div>
+  <div><label class="muted" for="section">Team</label><br>
+    <select id="section" name="section"><option value="">All teams</option>
+    {% for s in sections %}<option value="{{ s.pk }}" {% if filters.section == s.pk|stringformat:'s' %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select></div>
+  <div><label class="muted" for="status">Status</label><br>
+    <select id="status" name="status"><option value="">Any</option>
+    {% for v,l in status_choices %}<option value="{{ v }}" {% if filters.status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div><label class="muted" for="priority">Priority</label><br>
+    <select id="priority" name="priority"><option value="">Any</option>
+    {% for v,l in priority_choices %}<option value="{{ v }}" {% if filters.priority == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <label><input type="checkbox" name="mine" value="1" {% if filters.mine %}checked{% endif %}> Assigned to me</label>
+  <label><input type="checkbox" name="overdue" value="1" {% if filters.overdue %}checked{% endif %}> Overdue only</label>
+  <button class="btn primary" type="submit">Apply filters</button>
+  <a class="btn" href="{% url 'task_list' %}">Clear</a>
+</form>
+
+{% include "tasks/_task_table.html" with rows=page_obj %}
+
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="pager">
+  {% if page_obj.has_previous %}<a class="btn" href="?{{ base_qs }}&page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+  <span class="muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn" href="?{{ base_qs }}&page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

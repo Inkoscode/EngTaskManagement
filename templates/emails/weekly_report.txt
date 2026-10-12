@@ -1,0 +1,27 @@
+{% autoescape off %}{{ report.subject }}
+{% if report.intro %}
+{{ report.intro }}
+{% endif %}
+Totals: {{ data.totals.created }} created, {{ data.totals.completed }} completed, {{ data.totals.open }} open, {{ data.totals.blocked }} blocked, {{ data.totals.overdue }} overdue
+{% if personal %}
+Your tasks: {{ personal.total }} open{% if personal.overdue %}, {{ personal.overdue }} overdue{% endif %}
+{% for i in personal.items %}  - {{ i.title }} ({{ i.team }}{% if i.due %}, due {{ i.due }}{% endif %}){% if i.overdue %} OVERDUE{% endif %}
+{% endfor %}{% if personal.more %}  and {{ personal.more }} more
+{% endif %}{% endif %}{% for team in data.teams %}
+{{ team.name }}
+{{ team.created }} created this week, {{ team.completed.total }} completed, {{ team.open }} open
+{% if team.completed.rows %}Completed this week:
+{% for r in team.completed.rows %}  - {{ r.title }} ({{ r.assignee }})
+{% endfor %}{% if team.completed.more %}  and {{ team.completed.more }} more
+{% endif %}{% endif %}{% if team.blocked.rows %}Blocked:
+{% for r in team.blocked.rows %}  - {{ r.title }} ({{ r.assignee }})
+{% endfor %}{% if team.blocked.more %}  and {{ team.blocked.more }} more
+{% endif %}{% endif %}{% if team.overdue.rows %}Overdue:
+{% for r in team.overdue.rows %}  - {{ r.title }} ({{ r.assignee }}{% if r.due %}, due {{ r.due }}{% endif %})
+{% endfor %}{% if team.overdue.more %}  and {{ team.overdue.more }} more
+{% endif %}{% endif %}{% if team.upcoming.rows %}Due in the next 7 days:
+{% for r in team.upcoming.rows %}  - {{ r.title }} ({{ r.assignee }}, due {{ r.due }})
+{% endfor %}{% if team.upcoming.more %}  and {{ team.upcoming.more }} more
+{% endif %}{% endif %}{% endfor %}
+Open the portal: {{ portal_url }}
+{% endautoescape %}

@@ -1,0 +1,199 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Core Networks Task Management{% endblock %}</title>
+<style>
+:root{
+  --green-900:#0f3d24;--green-800:#14532d;--green-700:#15803d;--green-600:#16a34a;--green-100:#dcfce7;--green-50:#f0fdf4;
+  --ink:#1c2b22;--muted:#5b6b61;--line:#dbe5de;--bg:#f6f9f7;--white:#fff;
+  --bad:#b42318;--warn:#a15c07;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
+a{color:var(--green-700)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px;width:100%}
+
+/* Top bar (same as home page) */
+.topbar{background:var(--green-900);color:#fff;position:sticky;top:0;z-index:10}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;font-weight:600;font-size:17px;text-decoration:none;color:#fff}
+.brand-logo{height:36px;width:auto;max-width:180px;object-fit:contain;display:block;border-radius:6px}
+.nav{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.nav a,.nav button{display:inline-flex;align-items:center;color:#d6eadd;text-decoration:none;font:inherit;font-size:14px;padding:8px 14px;border-radius:6px;background:none;border:0;cursor:pointer}
+.nav a:hover,.nav button:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav a.on{background:rgba(255,255,255,.14);color:#fff}
+.nav .nav-cta{background:var(--green-600);color:#fff;font-weight:600}
+.nav .nav-cta:hover{background:var(--green-700)}
+.nav form{margin:0}
+.nav .who{color:#a9cbb6;font-size:13px;padding:0 8px}
+.nav a:focus-visible,.nav button:focus-visible,.btn:focus-visible{outline:3px solid #86efac;outline-offset:3px}
+
+main{flex:1;padding:28px 0 56px}
+h1{font-size:28px;margin:.1rem 0 1rem;color:var(--green-900);letter-spacing:-.3px}
+h2{font-size:19px;margin:1.8rem 0 .7rem;color:var(--green-900)}
+.muted{color:var(--muted);font-size:.9em}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--white);color:var(--ink);padding:8px 16px;border-radius:8px;font:inherit;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer}
+.btn:hover{background:var(--green-50)}
+.btn.primary{background:var(--green-700);border-color:var(--green-700);color:#fff}
+.btn.primary:hover{background:var(--green-800)}
+
+/* Layout helpers and cards */
+.row{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
+.spread{justify-content:space-between}
+.card{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:1rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.stat{border-top:4px solid var(--green-600)}
+.stat b{display:block;font-size:1.7rem;line-height:1.15;color:var(--green-800)}
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.teams a.card{text-decoration:none;color:inherit;border-top:4px solid var(--green-600)}
+.teams a.card:hover{background:var(--green-50)}
+.teams a.card.on{background:var(--green-100);border-color:var(--green-700)}
+.teams b{color:var(--green-800)}
+.teams .n{display:flex;gap:.8rem;margin-top:.3rem;font-size:.9em;color:var(--muted);flex-wrap:wrap}
+
+/* Filters and forms */
+.filters{display:flex;gap:.6rem;flex-wrap:wrap;align-items:end;margin:.8rem 0}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--white);border:1px solid var(--line);border-radius:6px;padding:.4rem .5rem;max-width:100%}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--green-600);outline-offset:1px}
+textarea{width:100%}
+.field{margin-bottom:.9rem}
+.field label{display:block;font-weight:600;margin-bottom:.2rem}
+.field input,.field select{width:100%;max-width:420px}
+.errorlist{color:var(--bad);list-style:none;margin:.2rem 0;padding:0;font-size:.9em}
+
+/* Tables */
+.tablewrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;background:var(--white);border:1px solid var(--line)}
+.tbl th,.tbl td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:top;font-size:15px}
+.tbl th{background:var(--green-50);color:var(--green-800);font-weight:600}
+.tbl tr:last-child td{border-bottom:0}
+
+/* Badges */
+.badge{display:inline-block;padding:.05rem .6rem;border-radius:999px;font-size:12px;font-weight:600;background:var(--white);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.s-todo{background:var(--bg)}
+.s-in_progress{background:var(--green-100);border-color:var(--green-100);color:var(--green-800)}
+.s-review{background:#fef3c7;border-color:#fef3c7;color:var(--warn)}
+.s-blocked{background:#fee4e2;border-color:#fee4e2;color:var(--bad)}
+.s-done{background:var(--green-700);border-color:var(--green-700);color:#fff}
+.p-high{background:#fef3c7;border-color:#fef3c7;color:var(--warn)}
+.p-critical{background:#fee4e2;border-color:#fee4e2;color:var(--bad)}
+.overdue{color:var(--bad);font-weight:700}
+
+/* Messages */
+.msgs{list-style:none;margin:0 0 1rem;padding:0}
+.msgs li{padding:.6rem .9rem;border-radius:8px;background:var(--green-100);border:1px solid var(--line);color:var(--green-900);margin-bottom:.4rem}
+.msgs .error{background:#fee4e2;color:var(--bad)}
+
+/* Board */
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(240px,1fr);gap:14px;overflow-x:auto;padding-bottom:.5rem}
+.col{background:var(--green-50);border:1px solid var(--line);border-radius:10px;padding:.7rem}
+.col h3{font-size:.95rem;margin:.1rem 0 .7rem;display:flex;justify-content:space-between;color:var(--green-800)}
+.tcard{background:var(--white);border:1px solid var(--line);border-left:4px solid var(--green-600);border-radius:6px;padding:.65rem;margin-bottom:.55rem}
+.tcard a.t{font-weight:600;text-decoration:none;color:var(--ink)}
+.tcard a.t:hover{text-decoration:underline}
+.tcard .meta{display:flex;gap:.4rem;flex-wrap:wrap;margin:.4rem 0;font-size:.85em}
+.tcard select{font-size:.85em;padding:.2rem}
+
+/* Task detail */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.4rem 2rem}
+.grid2 dt{color:var(--muted);font-size:.85em}
+.grid2 dd{margin:0 0 .6rem}
+.thread{border-top:1px solid var(--line);padding:.7rem 0}
+.pager{display:flex;gap:.75rem;align-items:center;margin-top:.9rem}
+
+footer{background:var(--green-900);color:#a9cbb6;font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-top:22px;padding-bottom:22px}
+footer a{color:#d6eadd;text-decoration:none;margin-left:18px}
+footer a:hover{text-decoration:underline}
+
+/* ---------- Responsive ---------- */
+/* Large screens: use the extra width for the board and tables */
+@media (min-width:1400px){.wrap{max-width:1320px}}
+
+/* Touch screens: comfortable tap targets, no iOS zoom-on-focus */
+@media (pointer:coarse){
+  .btn,.nav a,.nav button,select,input:not([type=checkbox]){min-height:44px}
+  input[type=checkbox]{width:20px;height:20px}
+}
+
+/* Tablet */
+@media (max-width:900px){
+  .wrap{padding:0 18px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .teams{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+}
+
+/* Phone */
+@media (max-width:640px){
+  .wrap{padding:0 14px}
+  main{padding:16px 0 40px}
+  h1{font-size:22px}
+  .topbar .wrap{padding-top:8px;padding-bottom:8px;min-height:0}
+  .nav{width:100%;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+  .nav a,.nav button{white-space:nowrap;flex-shrink:0}
+  .nav .who{display:none}
+  .row.spread{align-items:flex-start}
+
+  /* Filters stack to full width */
+  .filters{flex-direction:column;align-items:stretch}
+  .filters input:not([type=checkbox]),.filters select,.filters .btn{width:100%}
+  input,select,textarea{font-size:16px}
+  .field input,.field select{max-width:none}
+
+  /* Tables become one card per row */
+  .tbl.stack,.tbl.stack tbody,.tbl.stack tr,.tbl.stack td{display:block;width:100%}
+  .tbl.stack{background:none;border:0}
+  .tbl.stack thead{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .tbl.stack tr{background:var(--white);border:1px solid var(--line);border-left:4px solid var(--green-600);border-radius:8px;margin-bottom:10px;padding:6px 0}
+  .tbl.stack td{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border:0;padding:5px 14px;text-align:right}
+  .tbl.stack td::before{content:attr(data-label);color:var(--muted);font-weight:600;text-align:left;flex-shrink:0}
+
+  /* Board: swipe between status columns */
+  .board{grid-auto-columns:85%;scroll-snap-type:x mandatory}
+  .col{scroll-snap-align:start}
+
+  /* Task detail */
+  .grid2{grid-template-columns:1fr 1fr;gap:.3rem 1rem}
+  .pager{justify-content:space-between}
+  footer .wrap{flex-direction:column}
+  footer a{margin:0 18px 0 0}
+}
+
+@media (max-width:380px){
+  .stats{grid-template-columns:1fr 1fr;gap:10px}
+  .stat b{font-size:1.4rem}
+  .grid2{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="{% url 'home' %}"><img class="brand-logo" src="{% static 'icons/logo.png' %}" alt="">Core Networks Task Management</a>
+  <nav class="nav" aria-label="Main navigation">
+    <a href="{% url 'task_list' %}" {% if request.resolver_match.url_name == 'task_list' %}class="on"{% endif %}>All teams</a>
+    <a href="{% url 'my_dashboard' %}" {% if request.resolver_match.url_name == 'my_dashboard' %}class="on"{% endif %}>My dashboard</a>
+    {% if user.is_overall_boss or user.is_staff %}<a href="{% url 'report_list' %}" {% if 'report' in request.resolver_match.url_name %}class="on"{% endif %}>Reports</a>{% endif %}
+    {% if user.is_staff %}<a href="{% url 'admin:index' %}">Administration</a>{% endif %}
+    {% if user.is_overall_boss or user.memberships.exists %}<a class="nav-cta" href="{% url 'task_create' %}">New task</a>{% endif %}
+    <span class="who">{{ user.get_full_name|default:user.username }}</span>
+    <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Log out</button></form>
+  </nav>
+</div></header>
+
+<main><div class="wrap">
+  {% if messages %}<ul class="msgs">{% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>{% endif %}
+  {% block content %}{% endblock %}
+</div></main>
+
+<footer><div class="wrap">
+  <span>Core Networks Task Management</span>
+  <span><a href="{% url 'task_list' %}">All teams</a><a href="{% url 'my_dashboard' %}">My dashboard</a></span>
+</div></footer>
+</body>
+</html>

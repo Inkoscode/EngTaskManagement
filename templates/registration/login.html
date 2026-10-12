@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Log in | Engineering Task Portal</title>
+  <title>Log in | Core Networks Task Management</title>
   <style>
     :root {
       --green-900: #0f3d24;
@@ -33,8 +33,7 @@
     /* ICON SLOTS: put an <img>, inline <svg> or emoji inside any element with class "icon-slot" */
     .icon-slot { display: grid; place-items: center; flex-shrink: 0; overflow: hidden; line-height: 1; }
     .icon-slot img, .icon-slot svg { width: 100%; height: 100%; object-fit: contain; display: block; }
-    .icon-logo { width: 44px; height: 44px; border-radius: 10px; background: var(--green-600); padding: 9px; font-size: 24px; color: #fff; }
-    .icon-field { width: 18px; height: 18px; font-size: 14px; color: var(--muted); }
+    .brand-logo { height: 44px; width: auto; max-width: 220px; object-fit: contain; display: block; border-radius: 8px; }
 
     /* Brand panel */
     .brand-panel {
@@ -62,9 +61,8 @@
     label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
     .field { margin-bottom: 20px; }
     .input-wrap { position: relative; display: flex; align-items: center; }
-    .input-wrap .icon-field { position: absolute; left: 14px; pointer-events: none; }
     .input-wrap input {
-      width: 100%; padding: 12px 14px 12px 42px; font: inherit; font-size: 15px;
+      width: 100%; padding: 12px 14px; font: inherit; font-size: 15px;
       border: 1.5px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink);
     }
     .input-wrap input:focus { outline: none; border-color: var(--green-600); box-shadow: 0 0 0 3px rgba(22,163,74,.2); }
@@ -99,18 +97,14 @@
 
   <aside class="brand-panel">
     <a class="brand" href="{% url 'home' %}">
-      <!-- ICON SLOT: logo -->
-      <span class="icon-slot icon-logo" aria-hidden="true">
-        <!-- <img src="{% static 'icons/logo.png' %}" alt=""> -->
-        &#10003;
-      </span>
-      Engineering Task Portal
+      <img class="brand-logo" src="{% static 'icons/logo.png' %}" alt="">
+      Core Networks Task Management
     </a>
     <div>
       <h1>Plan, assign and track engineering work</h1>
       <p>Log in to see your section's tasks, update progress and keep a clear record of every change.</p>
     </div>
-    <small>Engineering Task Portal</small>
+    <small>Core Networks Task Management</small>
   </aside>
 
   <main class="form-panel">
@@ -136,10 +130,6 @@
         <div class="field">
           <label for="id_username">Username</label>
           <div class="input-wrap">
-            <!-- ICON SLOT: username field -->
-            <span class="icon-slot icon-field" aria-hidden="true">
-              <!-- <img src="{% static 'icons/user.png' %}" alt=""> -->
-            </span>
             <input type="text" name="username" id="id_username" autocomplete="username" autofocus required value="{{ form.username.value|default:'' }}">
           </div>
         </div>
@@ -147,10 +137,6 @@
         <div class="field">
           <label for="id_password">Password</label>
           <div class="input-wrap">
-            <!-- ICON SLOT: password field -->
-            <span class="icon-slot icon-field" aria-hidden="true">
-              <!-- <img src="{% static 'icons/lock.png' %}" alt=""> -->
-            </span>
             <input type="password" name="password" id="id_password" autocomplete="current-password" required>
             <button type="button" class="toggle" id="togglePw" aria-controls="id_password">Show</button>
           </div>

@@ -1,0 +1,63 @@
+{% extends "tasks/layout.html" %}
+{% block title %}{{ report.subject }} · Engineering Task Portal{% endblock %}
+{% block content %}
+<div class="row spread">
+  <h1>Weekly report, {{ report.week_start|date:"j M" }} to {{ report.week_end|date:"j M Y" }}</h1>
+  <a class="btn" href="{% url 'report_list' %}">All reports</a>
+</div>
+
+{% if report.status == 'sent' %}
+  <div class="card">
+    <span class="badge s-done">Sent</span>
+    {{ report.sent_at|date:"j M Y, H:i" }}{% if report.sent_by %} by {{ report.sent_by.get_full_name|default:report.sent_by.username }}{% endif %}.
+    Delivered to {{ report.recipient_count }} people{% if report.failed_count %}, <span class="overdue">{{ report.failed_count }} failed</span>{% endif %}.
+    <p class="muted" style="margin:.5rem 0 0">Subject: {{ report.subject }}</p>
+    {% if report.intro %}<p style="margin:.5rem 0 0">{{ report.intro|linebreaksbr }}</p>{% endif %}
+  </div>
+{% else %}
+  <p class="muted">This is a draft. Nothing has been emailed yet.</p>
+  <form method="post" class="card" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div class="field">{{ field.label_tag }}{{ field }}{% if field.help_text %}<div class="muted">{{ field.help_text }}</div>{% endif %}{{ field.errors }}</div>
+    {% endfor %}
+    <p class="muted">
+      Will be sent to <b>{{ recipient_count }}</b> {{ recipient_count|pluralize:"person,people" }} (every active user with an email address).
+      {% if missing_email %}<br>These users have no email address and will be skipped:
+        {% for u in missing_email %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}
+    </p>
+    <div class="row">
+      <button class="btn" type="submit" name="action" value="save">Save draft</button>
+      <button class="btn" type="submit" name="action" value="refresh">Refresh numbers</button>
+      <button class="btn" type="submit" name="action" value="test">Send test to me</button>
+      <button class="btn primary" type="submit" name="action" value="send"
+              onclick="return confirm('Send this report to {{ recipient_count }} people now? This cannot be undone.')">Send to everyone</button>
+    </div>
+  </form>
+{% endif %}
+
+<h2>Preview</h2>
+<div class="card" style="max-width:720px">
+  {% include "emails/_weekly_body.html" %}
+</div>
+<p class="muted">Each person also gets a "Your tasks" section listing their own open tasks.</p>
+
+{% if logs %}
+<h2>Delivery log</h2>
+<div class="tablewrap">
+<table class="tbl stack">
+  <thead><tr><th>When</th><th>To</th><th>Result</th></tr></thead>
+  <tbody>
+  {% for l in logs %}
+    <tr>
+      <td data-label="When">{{ l.created_at|date:"j M Y, H:i" }}</td>
+      <td data-label="To">{{ l.recipient }}{% if l.kind == 'weekly_test' %} <span class="muted">(test)</span>{% endif %}</td>
+      <td data-label="Result">{% if l.ok %}<span class="badge s-in_progress">Delivered</span>{% else %}<span class="badge s-blocked">Failed</span> <span class="muted">{{ l.error }}</span>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}
