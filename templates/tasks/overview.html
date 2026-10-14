@@ -1,5 +1,5 @@
 {% extends "tasks/layout.html" %}
-{% block title %}All teams · Task portal{% endblock %}
+{% block title %}All teams · Core Networks Task Management{% endblock %}
 {% block content %}
 <div class="row spread">
   <h1>All teams</h1>
@@ -23,7 +23,10 @@
   {% empty %}<p class="muted">No teams yet. Add them in the admin.</p>{% endfor %}
 </div>
 
-<h2>Tasks</h2>
+<div class="row spread" style="margin-top:1.6rem">
+  <h2 style="margin:0">{% if filters.archived %}Archived tasks{% else %}Tasks{% endif %}</h2>
+  <a class="btn" href="{% url 'task_export' %}{% if base_qs %}?{{ base_qs }}{% endif %}">Export to Excel</a>
+</div>
 <form class="filters" method="get">
   <div><label class="muted" for="q">Search</label><br><input id="q" name="q" value="{{ filters.q }}" placeholder="Title or system ref"></div>
   <div><label class="muted" for="section">Team</label><br>
@@ -35,13 +38,19 @@
   <div><label class="muted" for="priority">Priority</label><br>
     <select id="priority" name="priority"><option value="">Any</option>
     {% for v,l in priority_choices %}<option value="{{ v }}" {% if filters.priority == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div><label class="muted" for="sort">Sort by</label><br>
+    <select id="sort" name="sort"><option value="">Newest first</option>
+    {% for c in sort_columns %}<option value="{{ c.key }}" {% if filters.sort == c.key %}selected{% endif %}>{{ c.label }}</option>{% endfor %}</select></div>
+  <div><label class="muted" for="dir">Order</label><br>
+    <select id="dir" name="dir"><option value="asc" {% if filters.dir != 'desc' %}selected{% endif %}>Ascending</option><option value="desc" {% if filters.dir == 'desc' %}selected{% endif %}>Descending</option></select></div>
   <label><input type="checkbox" name="mine" value="1" {% if filters.mine %}checked{% endif %}> Assigned to me</label>
   <label><input type="checkbox" name="overdue" value="1" {% if filters.overdue %}checked{% endif %}> Overdue only</label>
+  <label><input type="checkbox" name="archived" value="1" {% if filters.archived %}checked{% endif %}> Archived only</label>
   <button class="btn primary" type="submit">Apply filters</button>
   <a class="btn" href="{% url 'task_list' %}">Clear</a>
 </form>
 
-{% include "tasks/_task_table.html" with rows=page_obj %}
+{% include "tasks/_task_table.html" with rows=page_obj today=today %}
 
 {% if page_obj.paginator.num_pages > 1 %}
 <div class="pager">

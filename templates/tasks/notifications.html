@@ -1,0 +1,30 @@
+{% extends "tasks/layout.html" %}
+{% block title %}Notifications · Core Networks Task Management{% endblock %}
+{% block content %}
+<div class="row spread">
+  <h1>Notifications</h1>
+  {% if unread %}
+  <form method="post" action="{% url 'notifications_read_all' %}" style="margin:0">{% csrf_token %}
+    <button class="btn" type="submit">Mark all as read</button>
+  </form>
+  {% endif %}
+</div>
+<p class="muted">{% if unread %}{{ unread }} unread.{% else %}You are all caught up.{% endif %} Opening a task marks its notifications as read.</p>
+
+{% if items %}
+<div class="note-list">
+  {% for n in items %}
+  <div class="note{% if not n.read_at %} unread{% endif %}">
+    <div>
+      {% if n.task %}<a href="{% url 'task_detail' n.task.pk %}">{{ n.message }}</a>{% else %}{{ n.message }}{% endif %}
+      {% if not n.read_at %}<span class="sr"> (unread)</span>{% endif %}
+      <div class="muted">{{ n.get_kind_display }}</div>
+    </div>
+    <span class="muted" style="white-space:nowrap">{{ n.created_at|timesince }} ago</span>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card"><p class="muted" style="margin:0">Nothing yet. You will see a message here when a task is assigned to you or someone comments on your task.</p></div>
+{% endif %}
+{% endblock %}

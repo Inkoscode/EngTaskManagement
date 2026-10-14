@@ -6,10 +6,10 @@
   {% csrf_token %}
   {{ form.non_field_errors }}
   {% for field in form %}
-    <div class="field">
+    <div class="field" id="field_{{ field.name }}">
       {{ field.label_tag }}
       {{ field }}
-      {% if field.help_text %}<div class="muted">{{ field.help_text }}</div>{% endif %}
+      {% if field.help_text %}<div class="muted" id="help_{{ field.name }}" aria-live="polite">{{ field.help_text }}</div>{% endif %}
       {{ field.errors }}
     </div>
   {% endfor %}
@@ -18,4 +18,54 @@
     <a class="btn" href="{% if form.instance.pk %}{% url 'task_detail' form.instance.pk %}{% else %}{% url 'my_dashboard' %}{% endif %}">Cancel</a>
   </div>
 </form>
+<script>
+/* When a team is chosen, list only that team's members in "Assignee". */
+(function () {
+  var team = document.getElementById('id_owning_section');
+  var who = document.getElementById('id_assignee');
+  var help = document.getElementById('help_assignee');
+  if (!team || !who) { return; }
+
+  var everyone = Array.prototype.map.call(who.options, function (o) {
+    return { value: o.value, text: o.text,
+             teams: (o.getAttribute('data-sections') || '').split(',').filter(Boolean) };
+  });
+
+  function update() {
+    var section = team.value;
+    var keep = who.value;
+    var shown = everyone.filter(function (o) {
+      return o.value === '' || (section !== '' && o.teams.indexOf(section) !== -1);
+    });
+    who.innerHTML = '';
+    shown.forEach(function (o) { who.add(new Option(o.text, o.value)); });
+    who.value = shown.some(function (o) { return o.value === keep; }) ? keep : '';
+    who.disabled = (section === '');
+    if (help) {
+      if (section === '') { help.textContent = 'Choose a team first, then pick one of its members.'; }
+      else if (shown.length === 1) { help.textContent = 'This team has no members yet. Add them in the admin.'; }
+      else { help.textContent = 'Only members of the selected team are listed.'; }
+    }
+  }
+
+  team.addEventListener('change', update);
+  update();
+})();
+</script>
+<script>
+/* The "Blocked reason" box only appears (and is required) when the status is Blocked. */
+(function () {
+  var status = document.getElementById('id_status');
+  var box = document.getElementById('field_blocked_reason');
+  var text = document.getElementById('id_blocked_reason');
+  if (!status || !box || !text) { return; }
+  function sync() {
+    var blocked = status.value === 'blocked';
+    box.style.display = blocked ? '' : 'none';
+    text.required = blocked;
+  }
+  status.addEventListener('change', sync);
+  sync();
+})();
+</script>
 {% endblock %}

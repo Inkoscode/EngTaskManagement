@@ -14,7 +14,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import EmailLog, Task, WeeklyReport
+from .models import Comment, EmailLog, Notification, Task, WeeklyReport
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -54,20 +54,28 @@ def _deliver(kind, to_email, subject, text, html=None, *, reply_to=None, connect
 
 # ------------------------------------------------------------------ task assigned
 def notify_assigned(task_id, actor):
-    """Tell the assignee they have a task. Skips self-assignment and people without an email."""
+    """
+    Tell the assignee they have a task: always a bell notification, plus an email when they have an
+    address. Skips self-assignment. Returns True if an email was accepted by the mail server.
+    """
     task = (Task.objects.select_related("owning_section", "assignee", "creator")
             .filter(pk=task_id).first())
     if task is None or task.assignee is None:
         return False
     assignee = task.assignee
-    if not assignee.is_active or not assignee.email:
+    if not assignee.is_active:
         return False
     if actor is not None and assignee.pk == actor.pk:
+        return False
+    actor_name = person(actor) if actor is not None else "Someone"
+    Notification.objects.create(user=assignee, task=task, kind=Notification.ASSIGNED,
+                                message=f"{actor_name} assigned you: {task.title}"[:255])
+    if not assignee.email:
         return False
     ctx = {
         "task": task,
         "assignee": assignee,
-        "actor_name": person(actor) if actor is not None else "Someone",
+        "actor_name": actor_name,
         "task_url": absolute(reverse("task_detail", args=[task.pk])),
         "dashboard_url": absolute(reverse("my_dashboard")),
     }
@@ -78,6 +86,36 @@ def notify_assigned(task_id, actor):
         render_to_string("emails/assignment.html", ctx),
         reply_to=reply_to, task=task,
     )
+
+
+# ------------------------------------------------------------------ new comment
+def notify_commented(comment_id):
+    """Tell the task's assignee and creator (never the author) about a new comment. Returns emails sent."""
+    comment = (Comment.objects.select_related("task__owning_section", "task__assignee", "task__creator", "author")
+               .filter(pk=comment_id).first())
+    if comment is None:
+        return 0
+    task, author = comment.task, comment.author
+    recipients = {}
+    for user in (task.assignee, task.creator):
+        if user is not None and user.is_active and user.pk != author.pk:
+            recipients[user.pk] = user
+    sent = 0
+    for user in recipients.values():
+        Notification.objects.create(user=user, task=task, kind=Notification.COMMENT,
+                                    message=f"{person(author)} commented on: {task.title}"[:255])
+        if not user.email:
+            continue
+        ctx = {
+            "task": task, "comment": comment, "recipient": user, "author_name": person(author),
+            "task_url": absolute(reverse("task_detail", args=[task.pk])),
+        }
+        reply_to = [author.email] if author.email else None
+        if _deliver(EmailLog.COMMENT, user.email, f"New comment on: {task.title}",
+                    render_to_string("emails/comment.txt", ctx), render_to_string("emails/comment.html", ctx),
+                    reply_to=reply_to, task=task):
+            sent += 1
+    return sent
 
 
 # ------------------------------------------------------------------ weekly report
@@ -92,7 +130,7 @@ def users_missing_email():
 def personal_block(user):
     """The 'Your tasks' section: open tasks assigned to this person."""
     today = timezone.localdate()
-    qs = Task.objects.filter(assignee=user, status__in=Task.OPEN_STATUSES)
+    qs = Task.objects.active().filter(assignee=user, status__in=Task.OPEN_STATUSES)
     total = qs.count()
     if not total:
         return None

@@ -1,13 +1,33 @@
 {% extends "tasks/layout.html" %}
-{% block title %}{{ task.title }} · Task portal{% endblock %}
+{% block title %}{{ task.title }} · Core Networks Task Management{% endblock %}
 {% block content %}
 <div class="row spread">
   <h1>{{ task.title }}</h1>
   <div class="row">
     {% if can_edit %}<a class="btn" href="{% url 'task_edit' task.pk %}">Edit task</a>{% endif %}
+    {% if can_archive and not task.is_archived %}
+    <form method="post" action="{% url 'task_archive' task.pk %}" style="margin:0">{% csrf_token %}
+      <button class="btn" type="submit" onclick="return confirm('Archive this task? It will leave the dashboards but stay in the history.')">Archive</button>
+    </form>
+    {% endif %}
     <a class="btn" href="{% url 'task_list' %}">Back to all teams</a>
   </div>
 </div>
+
+{% if task.is_archived %}
+<div class="banner" role="status">
+  <b>Archived</b> on {{ task.archived_at|date:"j M Y" }}. It no longer shows on the dashboards or in reports, and it cannot be edited.
+  {% if can_archive %}
+  <form method="post" action="{% url 'task_unarchive' task.pk %}" style="display:inline;margin-left:.5rem">{% csrf_token %}
+    <button class="btn" type="submit">Restore task</button>
+  </form>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if task.status == 'blocked' %}
+<div class="reason" role="status"><b>Blocked:</b> {{ task.blocked_reason|default:"No reason recorded." }}</div>
+{% endif %}
 
 <div class="card">
   <dl class="grid2">
@@ -24,12 +44,33 @@
   {% if task.description %}<p style="white-space:pre-wrap">{{ task.description }}</p>{% endif %}
 
   {% if can_status %}
-  <form class="row" method="post" action="{% url 'task_status' task.pk %}">
+  <form method="post" action="{% url 'task_status' task.pk %}">
     {% csrf_token %}
-    <label for="id_status">Change status</label>
-    {{ status_form.status }}
-    <button class="btn primary" type="submit">Update status</button>
+    <div class="row">
+      <label for="id_status">Change status</label>
+      {{ status_form.status }}
+      <button class="btn primary" type="submit">Update status</button>
+    </div>
+    <div class="field" id="reason-wrap" style="margin-top:.8rem">
+      <label for="id_blocked_reason">Why is it blocked?</label>
+      {{ status_form.blocked_reason }}
+      <div class="muted">Required when the status is Blocked.</div>
+    </div>
   </form>
+  <script>
+  (function () {
+    var status = document.getElementById('id_status');
+    var wrap = document.getElementById('reason-wrap');
+    var text = document.getElementById('id_blocked_reason');
+    function sync() {
+      var blocked = status.value === 'blocked';
+      wrap.style.display = blocked ? '' : 'none';
+      text.required = blocked;
+    }
+    status.addEventListener('change', sync);
+    sync();
+  })();
+  </script>
   {% endif %}
 </div>
 
@@ -43,6 +84,7 @@
     <form method="post" action="{% url 'add_comment' task.pk %}">
       {% csrf_token %}{{ comment_form.body }}
       <p><button class="btn primary" type="submit">Post comment</button></p>
+      <p class="muted">The assignee and the person who created the task are notified.</p>
     </form>
   </div>
 
@@ -66,7 +108,7 @@
     {% for e in events %}
       <tr><td data-label="When">{{ e.at|date:"j M Y, H:i" }}</td>
       <td data-label="Who">{{ e.actor.get_full_name|default:e.actor.username|default:"Removed user" }}</td>
-      <td data-label="Change">{% if e.field == 'created' %}Created the task{% else %}{{ e.field }}: {{ e.old_value|default:"empty" }} to {{ e.new_value|default:"empty" }}{% endif %}</td></tr>
+      <td data-label="Change">{% if e.field == 'created' %}Created the task{% else %}{{ e.field_label|capfirst }}: {{ e.old_value|default:"empty" }} to {{ e.new_value|default:"empty" }}{% endif %}</td></tr>
     {% empty %}<tr><td colspan="3" class="muted">No history yet.</td></tr>{% endfor %}
     </tbody>
   </table></div>

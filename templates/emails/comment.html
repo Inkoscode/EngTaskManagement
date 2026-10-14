@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en"><body style="margin:0;background:#f6f9f7;font-family:'Segoe UI',Arial,sans-serif;color:#1c2b22">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border:1px solid #dbe5de;border-radius:8px">
+  <tr><td style="background:#0f3d24;color:#ffffff;padding:16px 24px;font-size:16px;font-weight:600;border-radius:8px 8px 0 0">Core Networks Task Management</td></tr>
+  <tr><td style="padding:24px">
+    <p style="margin:0 0 12px">Hello {{ recipient.get_full_name|default:recipient.username }},</p>
+    <p style="margin:0 0 18px"><b>{{ author_name }}</b> commented on <b>{{ task.title }}</b> ({{ task.owning_section.name }}).</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dbe5de;border-left:4px solid #16a34a;border-radius:6px">
+      <tr><td style="padding:14px 16px;font-size:14px;line-height:1.55">{{ comment.body|truncatechars:600|linebreaksbr }}</td></tr>
+    </table>
+    <p style="margin:22px 0 0"><a href="{{ task_url }}" style="display:inline-block;background:#15803d;color:#ffffff;text-decoration:none;font-weight:600;padding:11px 20px;border-radius:8px">Open the task</a></p>
+  </td></tr>
+  <tr><td style="padding:14px 24px;border-top:1px solid #dbe5de;font-size:12px;color:#5b6b61">You are receiving this because you are the assignee or the creator of this task.</td></tr>
+</table></td></tr></table></body></html>

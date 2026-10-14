@@ -37,14 +37,24 @@ def can_create_task(user):
     return user.is_overall_boss or user.memberships.exists()
 
 
-def can_edit_task(user, task):
+def _manages(user, task):
+    """Overall boss, the section's team boss, or the task's creator (while still in the section)."""
     if user.is_overall_boss or is_team_boss(user, task.owning_section_id):
         return True
     return task.creator_id == user.id and is_member(user, task.owning_section_id)
 
 
+def can_edit_task(user, task):
+    return not task.is_archived and _manages(user, task)
+
+
+def can_archive_task(user, task):
+    """Archiving and un-archiving use the same people as editing, but work on archived tasks too."""
+    return _manages(user, task)
+
+
 def can_update_status(user, task):
-    return can_edit_task(user, task) or task.assignee_id == user.id
+    return not task.is_archived and (_manages(user, task) or task.assignee_id == user.id)
 
 
 def can_comment(user, task):
@@ -70,3 +80,8 @@ def attach_permissions(user, tasks):
 def can_manage_reports(user):
     """Who may draft, edit and send weekly reports: the overall boss and admin staff."""
     return user.is_active and (user.is_overall_boss or user.is_staff)
+
+
+def can_view_workload(user):
+    """Team bosses see their own teams; the overall boss sees every team."""
+    return user.is_overall_boss or user.memberships.filter(role=Membership.TEAM_BOSS).exists()

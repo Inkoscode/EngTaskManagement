@@ -14,7 +14,7 @@ Your tasks: {{ personal.total }} open{% if personal.overdue %}, {{ personal.over
 {% for r in team.completed.rows %}  - {{ r.title }} ({{ r.assignee }})
 {% endfor %}{% if team.completed.more %}  and {{ team.completed.more }} more
 {% endif %}{% endif %}{% if team.blocked.rows %}Blocked:
-{% for r in team.blocked.rows %}  - {{ r.title }} ({{ r.assignee }})
+{% for r in team.blocked.rows %}  - {{ r.title }} ({{ r.assignee }}){% if r.reason %}: {{ r.reason }}{% endif %}
 {% endfor %}{% if team.blocked.more %}  and {{ team.blocked.more }} more
 {% endif %}{% endif %}{% if team.overdue.rows %}Overdue:
 {% for r in team.overdue.rows %}  - {{ r.title }} ({{ r.assignee }}{% if r.due %}, due {{ r.due }}{% endif %})

@@ -1,0 +1,52 @@
+{% extends "tasks/layout.html" %}
+{% block title %}Calendar · Core Networks Task Management{% endblock %}
+{% block content %}
+<div class="row spread">
+  <div>
+    <h1>Calendar</h1>
+    <p class="muted" style="margin-top:-.6rem">{{ start|date:"j M" }} to {{ end|date:"j M Y" }}</p>
+  </div>
+  <div class="row">
+    <a class="btn" href="{{ prev_url }}">Previous 4 weeks</a>
+    <a class="btn" href="{{ today_url }}">Today</a>
+    <a class="btn" href="{{ next_url }}">Next 4 weeks</a>
+  </div>
+</div>
+
+<form class="filters" method="get">
+  <input type="hidden" name="start" value="{{ start|date:'Y-m-d' }}">
+  <div><label class="muted" for="team">Team</label><br>
+    <select id="team" name="team"><option value="">All teams</option>
+    {% for s in sections %}<option value="{{ s.pk }}" {% if filters.team == s.pk|stringformat:'s' %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select></div>
+  <label><input type="checkbox" name="mine" value="1" {% if filters.mine %}checked{% endif %}> Assigned to me</label>
+  <label><input type="checkbox" name="done" value="1" {% if filters.done %}checked{% endif %}> Include finished tasks</label>
+  <button class="btn primary" type="submit">Apply</button>
+</form>
+
+<div class="legend">
+  <span><i class="k-bar"></i>Planned start to planned finish</span>
+  <span><i class="k-due"></i>Due date</span>
+  <span><i class="k-today"></i>Today</span>
+</div>
+
+{% if has_rows %}
+<div class="tl-wrap"><div class="tl">
+  <div class="tl-row"><div class="tl-label muted">Week of</div>{% for w in weeks %}<div class="tl-week">{{ w|date:"j M" }}</div>{% endfor %}</div>
+  <div class="tl-row"><div class="tl-label"></div>{% for d in days %}<div class="tl-day{% if d.today %} today{% endif %}{% if d.weekend %} wk{% endif %}" title="{{ d.date|date:'l j F Y' }}">{{ d.date.day }}</div>{% endfor %}</div>
+  {% for g in groups %}
+    <div class="tl-group">{{ g.name }}</div>
+    {% for r in g.rows %}
+    <div class="tl-row">
+      <a class="tl-label" href="{% url 'task_detail' r.id %}"><b>{{ r.title }}</b><small>{{ r.assignee }}, {{ r.status_label }}</small></a>
+      {% if today_col %}<span class="tl-today" style="grid-column: {{ today_col }}" aria-hidden="true"></span>{% endif %}
+      {% if r.start_col %}<a class="tl-bar st-{{ r.status }}{% if r.cut_left %} cl{% endif %}{% if r.cut_right %} cr{% endif %}" style="grid-column: {{ r.start_col }} / span {{ r.span }}" href="{% url 'task_detail' r.id %}" title="{{ r.title }}: planned {{ r.first|date:'j M' }} to {{ r.last|date:'j M' }}">{{ r.title }}<span class="sr"> planned {{ r.first|date:"j M" }} to {{ r.last|date:"j M" }}</span></a>{% endif %}
+      {% if r.due_col %}<span class="tl-due{% if r.overdue %} late{% endif %}" style="grid-column: {{ r.due_col }}" title="Due {{ r.due|date:'j M Y' }}{% if r.overdue %} (overdue){% endif %}"><span class="sr">Due {{ r.due|date:"j M Y" }}</span></span>{% endif %}
+    </div>
+    {% endfor %}
+  {% endfor %}
+</div></div>
+{% else %}
+<div class="card"><p class="muted" style="margin:0">Nothing is planned in these four weeks. Tasks appear here when they have a planned start, planned finish or due date.</p></div>
+{% endif %}
+{% if no_dates %}<p class="muted" style="margin-top:.8rem">{{ no_dates }} task{{ no_dates|pluralize }} in this view {{ no_dates|pluralize:"has,have" }} no dates, so {{ no_dates|pluralize:"it is,they are" }} not shown.</p>{% endif %}
+{% endblock %}

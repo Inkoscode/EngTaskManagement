@@ -1,0 +1,68 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Core Networks Task Management{% endblock %}</title>
+  <style>
+    :root {
+      --green-900: #0f3d24; --green-800: #14532d; --green-700: #15803d; --green-600: #16a34a;
+      --green-100: #dcfce7; --green-50: #f0fdf4; --ink: #1c2b22; --muted: #5b6b61; --line: #cfdcd3;
+      --danger: #b42318; --danger-bg: #fef3f2;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; color: var(--ink); background: #f6f9f7; display: grid; grid-template-columns: 1fr 1fr; }
+    .brand-logo { height: 44px; width: auto; max-width: 220px; object-fit: contain; display: block; border-radius: 8px; }
+    .brand-panel { background: linear-gradient(180deg, var(--green-900), var(--green-800)); color: #fff; padding: 48px 56px; display: flex; flex-direction: column; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: 24px; text-decoration: none; color: #fff; }
+    .brand-panel h1 { font-size: 36px; line-height: 1.2; margin: 0 0 16px; letter-spacing: -0.4px; }
+    .brand-panel p { color: #c5e2cf; font-size: 17px; max-width: 420px; margin: 0; }
+    .brand-panel small { color: #a9cbb6; font-size: 14px; }
+    .form-panel { display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+    .card { width: 100%; max-width: 400px; }
+    .card h2 { font-size: 28px; margin: 0 0 6px; color: var(--green-900); letter-spacing: -0.3px; }
+    .card .sub { color: var(--muted); margin: 0 0 28px; }
+    .alert { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecdca; border-radius: 8px; padding: 12px 14px; font-size: 14px; margin-bottom: 20px; }
+    .alert.info { background: var(--green-50); color: var(--green-800); border-color: #bbf7d0; }
+    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .field { margin-bottom: 20px; }
+    .field input { width: 100%; padding: 12px 14px; font: inherit; font-size: 15px; border: 1.5px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); }
+    .field input:focus { outline: none; border-color: var(--green-600); box-shadow: 0 0 0 3px rgba(22,163,74,.2); }
+    .errorlist { color: var(--danger); list-style: none; margin: 6px 0 0; padding: 0; font-size: 14px; }
+    .hint { color: var(--muted); font-size: 13px; margin-top: 6px; }
+    .hint ul { margin: 6px 0 0; padding-left: 18px; }
+    .btn { display: block; width: 100%; padding: 13px 24px; border: 0; border-radius: 8px; cursor: pointer; background: var(--green-700); color: #fff; font: inherit; font-size: 15px; font-weight: 600; text-align: center; text-decoration: none; }
+    .btn:hover { background: var(--green-800); }
+    .btn:focus-visible, .links a:focus-visible { outline: 3px solid #86efac; outline-offset: 2px; }
+    .links { margin-top: 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 14px; }
+    .links a { color: var(--green-700); text-decoration: none; font-weight: 600; }
+    .links a:hover { text-decoration: underline; }
+    @media (max-width: 820px) {
+      body { grid-template-columns: 1fr; }
+      .brand-panel { padding: 28px 24px; gap: 20px; }
+      .brand { font-size: 20px; }
+      .brand-panel h1 { font-size: 26px; margin-bottom: 8px; }
+      .brand-panel p { font-size: 15px; }
+      .brand-panel small { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="brand-panel">
+    <a class="brand" href="{% url 'home' %}">
+      <img class="brand-logo" src="{% static 'icons/logo.png' %}" alt="">
+      Core Networks Task Management
+    </a>
+    <div>
+      <h1>Plan, assign and track engineering work</h1>
+      <p>Forgot your password? It happens. We will email you a link to choose a new one.</p>
+    </div>
+    <small>Core Networks Task Management</small>
+  </aside>
+  <main class="form-panel">
+    <div class="card">
+      {% block card %}{% endblock %}
+    </div>
+  </main>
+</body>
+</html>

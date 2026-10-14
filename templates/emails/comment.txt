@@ -1,0 +1,14 @@
+{% autoescape off %}Hello {{ recipient.get_full_name|default:recipient.username }},
+
+{{ author_name }} commented on a task you are involved in.
+
+Task: {{ task.title }}
+Team: {{ task.owning_section.name }}
+
+{{ comment.body|truncatechars:600 }}
+
+Open the task and reply:
+{{ task_url }}
+
+You are receiving this because you are the assignee or the creator of this task.
+{% endautoescape %}

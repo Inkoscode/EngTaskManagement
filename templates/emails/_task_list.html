@@ -1,7 +1,7 @@
 {% if block.rows %}
 <p style="margin:12px 0 4px;font-weight:600;font-size:14px;color:#14532d">{{ title }} ({{ block.total }})</p>
 <ul style="margin:0 0 8px;padding-left:20px;font-size:14px;line-height:1.6">
-{% for r in block.rows %}<li><a href="{{ site_url }}{{ r.path }}" style="color:#15803d">{{ r.title }}</a> <span style="color:#5b6b61">{{ r.assignee }}{% if r.due %}, due {{ r.due }}{% endif %}</span></li>
+{% for r in block.rows %}<li><a href="{{ site_url }}{{ r.path }}" style="color:#15803d">{{ r.title }}</a> <span style="color:#5b6b61">{{ r.assignee }}{% if r.due %}, due {{ r.due }}{% endif %}</span>{% if r.reason %}<br><span style="color:#b42318">Blocked: {{ r.reason }}</span>{% endif %}</li>
 {% endfor %}</ul>
 {% if block.more %}<p style="margin:0 0 8px;font-size:13px;color:#5b6b61">and {{ block.more }} more</p>{% endif %}
 {% endif %}

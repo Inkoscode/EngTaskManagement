@@ -34,6 +34,7 @@ def _rows(qs):
             "title": t.title,
             "assignee": (t.assignee.get_full_name() or t.assignee.username) if t.assignee else "Unassigned",
             "due": _label(t.due_date) if t.due_date else "",
+            "reason": t.blocked_reason if t.status == "blocked" else "",
             "path": reverse("task_detail", args=[t.pk]),
         })
     return {"rows": rows, "total": total, "more": max(0, total - len(rows))}
@@ -48,13 +49,14 @@ def build_report_data(start, end):
     teams = []
     totals = {"created": 0, "completed": 0, "open": 0, "blocked": 0, "overdue": 0}
     for section in Section.objects.all():
-        tasks = Task.objects.filter(owning_section=section)
+        everything = Task.objects.filter(owning_section=section)   # includes archived: they still count as done
+        tasks = everything.active()
         open_qs = tasks.filter(status__in=Task.OPEN_STATUSES)
         team = {
             "name": section.name,
-            "created": tasks.filter(created_at__date__gte=start, created_at__date__lte=end).count(),
+            "created": everything.filter(created_at__date__gte=start, created_at__date__lte=end).count(),
             "open": open_qs.count(),
-            "completed": _rows(tasks.filter(pk__in=done_ids, status="done").order_by("-created_at")),
+            "completed": _rows(everything.filter(pk__in=done_ids, status="done").order_by("-created_at")),
             "blocked": _rows(open_qs.filter(status="blocked")),
             "overdue": _rows(open_qs.filter(due_date__lt=today).order_by("due_date")),
             "upcoming": _rows(open_qs.filter(due_date__gt=end, due_date__lte=end + timedelta(days=7))

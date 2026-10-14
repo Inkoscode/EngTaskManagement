@@ -28,10 +28,10 @@ class HomePageTests(TestCase):
         self.assertNotContains(r, 'href="#systems"')
 
     def test_logo_on_home_and_on_logged_in_pages(self):
-        self.assertContains(self.client.get("/"), "/static/icons/logo.svg")
+        self.assertContains(self.client.get("/"), "/static/icons/logo.")  # logo.svg or logo.png
         user = get_user_model().objects.create_user("u", password="pw")
         self.client.force_login(user)
-        self.assertContains(self.client.get(reverse("task_list")), "/static/icons/logo.svg")
+        self.assertContains(self.client.get(reverse("task_list")), "/static/icons/logo.")
 
     def test_logged_in_users_still_go_to_the_dashboard(self):
         user = get_user_model().objects.create_user("u", password="pw")

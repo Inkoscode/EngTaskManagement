@@ -44,7 +44,7 @@
       flex-direction: column;
       justify-content: space-between;
     }
-    .brand { display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: 18px; text-decoration: none; color: #fff; }
+    .brand { display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: 24px; text-decoration: none; color: #fff; }
     .brand-panel h1 { font-size: 36px; line-height: 1.2; margin: 0 0 16px; letter-spacing: -0.4px; }
     .brand-panel p { color: #c5e2cf; font-size: 17px; max-width: 420px; margin: 0; }
     .brand-panel small { color: #a9cbb6; font-size: 14px; }
@@ -87,6 +87,7 @@
     @media (max-width: 820px) {
       body { grid-template-columns: 1fr; }
       .brand-panel { padding: 28px 24px; gap: 20px; }
+      .brand { font-size: 20px; }
       .brand-panel h1 { font-size: 26px; margin-bottom: 8px; }
       .brand-panel p { font-size: 15px; }
       .brand-panel small { display: none; }
@@ -145,6 +146,8 @@
         <input type="hidden" name="next" value="{{ next }}">
         <button type="submit" class="btn">Log in</button>
       </form>
+
+      <p style="margin:18px 0 0;font-size:14px"><a href="{% url 'password_reset' %}" style="color:var(--green-700);font-weight:600;text-decoration:none">Forgot your password?</a></p>
 
       <div class="links">
         <a href="{% url 'home' %}">Back to home</a>

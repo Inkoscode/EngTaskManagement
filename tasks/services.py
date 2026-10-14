@@ -1,7 +1,7 @@
 from .models import TaskEvent
 
 TRACKED_FIELDS = [
-    "title", "description", "priority", "status", "owning_section",
+    "title", "description", "priority", "status", "blocked_reason", "owning_section",
     "assignee", "planned_start", "planned_finish", "due_date", "system_ref",
 ]
 
@@ -25,3 +25,8 @@ def log_changes(before, task, actor):
 
 def log_created(task, actor):
     TaskEvent.objects.create(task=task, actor=actor, field="created", new_value=task.title)
+
+
+def log_event(task, actor, field, old="", new=""):
+    """One custom history line, for example when a task is archived."""
+    TaskEvent.objects.create(task=task, actor=actor, field=field, old_value=old[:255], new_value=new[:255])

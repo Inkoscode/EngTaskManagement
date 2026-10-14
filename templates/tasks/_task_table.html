@@ -1,10 +1,18 @@
 <div class="tablewrap">
 <table class="tbl stack">
-  <thead><tr><th>Task</th><th>Team</th><th>Assignee</th><th>Priority</th><th>Status</th><th>Due</th></tr></thead>
+  <thead><tr>
+  {% if sort_columns %}
+    {% for c in sort_columns %}
+      <th {% if c.active %}aria-sort="{{ c.aria }}"{% endif %}><a class="sort{% if c.active %} on{% endif %}" href="{{ c.url }}">{{ c.label }}{% if c.active %} <span aria-hidden="true">{% if c.dir == 'asc' %}&#9650;{% else %}&#9660;{% endif %}</span>{% endif %}</a></th>
+    {% endfor %}
+  {% else %}
+    <th>Task</th><th>Team</th><th>Assignee</th><th>Priority</th><th>Status</th><th>Due</th>
+  {% endif %}
+  </tr></thead>
   <tbody>
   {% for t in rows %}
     <tr>
-      <td data-label="Task"><span><a href="{% url 'task_detail' t.pk %}">{{ t.title }}</a>{% if t.system_ref %}<span class="muted" style="display:block">{{ t.system_ref }}</span>{% endif %}</span></td>
+      <td data-label="Task"><span><a href="{% url 'task_detail' t.pk %}">{{ t.title }}</a>{% if t.system_ref %}<span class="muted" style="display:block">{{ t.system_ref }}</span>{% endif %}{% if t.status == 'blocked' and t.blocked_reason %}<span class="muted" style="display:block;color:var(--bad)">Blocked: {{ t.blocked_reason|truncatechars:90 }}</span>{% endif %}</span></td>
       <td data-label="Team">{{ t.owning_section.name }}</td>
       <td data-label="Assignee">{% if t.assignee %}{{ t.assignee.get_full_name|default:t.assignee.username }}{% else %}<span class="muted">Unassigned</span>{% endif %}</td>
       <td data-label="Priority"><span class="badge p-{{ t.priority }}">{{ t.get_priority_display }}</span></td>

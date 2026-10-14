@@ -3,8 +3,13 @@ from . import report_views, views
 
 # The project urls.py mounts this file under "tasks/", so no "tasks/" prefix here.
 urlpatterns = [
-    path("", views.overview, name="task_list"),            # general dashboard (everyone, all teams)
-    path("dashboard/", views.my_dashboard, name="my_dashboard"),  # my team's board + my assignments
+    path("", views.overview, name="task_list"),                      # general dashboard (everyone, all teams)
+    path("dashboard/", views.my_dashboard, name="my_dashboard"),     # my team's board + my assignments
+    path("export/", views.task_export, name="task_export"),          # CSV of the filtered list
+    path("calendar/", views.calendar, name="calendar"),              # four-week timeline
+    path("workload/", views.workload, name="workload"),              # team bosses: open tasks per person
+    path("notifications/", views.notification_list, name="notification_list"),
+    path("notifications/read-all/", views.notifications_read_all, name="notifications_read_all"),
     path("new/", views.task_create, name="task_create"),
     path("reports/", report_views.report_list, name="report_list"),
     path("reports/generate/", report_views.report_generate, name="report_generate"),
@@ -12,6 +17,8 @@ urlpatterns = [
     path("<int:pk>/", views.task_detail, name="task_detail"),
     path("<int:pk>/edit/", views.task_edit, name="task_edit"),
     path("<int:pk>/status/", views.task_status, name="task_status"),
+    path("<int:pk>/archive/", views.task_archive, name="task_archive"),
+    path("<int:pk>/unarchive/", views.task_unarchive, name="task_unarchive"),
     path("<int:pk>/comment/", views.add_comment, name="add_comment"),
     path("<int:pk>/note/", views.add_private_note, name="add_private_note"),
 ]

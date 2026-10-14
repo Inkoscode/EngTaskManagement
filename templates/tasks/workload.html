@@ -1,0 +1,33 @@
+{% extends "tasks/layout.html" %}
+{% block title %}Workload · Core Networks Task Management{% endblock %}
+{% block content %}
+<h1>Team workload</h1>
+<p class="muted" style="max-width:660px">Open tasks per person, so work can be shared fairly. Archived tasks are not counted. "Finished" counts tasks completed in the last 14 days.</p>
+
+{% for team in teams %}
+<h2>{{ team.name }} <span class="muted" style="font-weight:400">{{ team.open_total }} open task{{ team.open_total|pluralize }}</span></h2>
+<div class="tablewrap">
+<table class="tbl stack">
+  <thead><tr><th>Person</th><th>Role</th><th>Open</th><th>Blocked</th><th>Overdue</th><th>Due in 7 days</th><th>Finished</th></tr></thead>
+  <tbody>
+  {% for r in team.rows %}
+    <tr>
+      <td data-label="Person">{{ r.name }}</td>
+      <td data-label="Role">{{ r.role }}</td>
+      <td data-label="Open"><div class="row" style="gap:.6rem;flex-wrap:nowrap"><b>{{ r.open }}</b><div class="load" aria-hidden="true"><i style="width: {{ r.pct }}%"></i></div></div></td>
+      <td data-label="Blocked">{{ r.blocked }}</td>
+      <td data-label="Overdue">{% if r.overdue %}<span class="overdue">{{ r.overdue }}</span>{% else %}0{% endif %}</td>
+      <td data-label="Due in 7 days">{{ r.due_soon }}</td>
+      <td data-label="Finished">{{ r.finished }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="7" class="muted">No members in this team yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% if team.unassigned %}<p class="muted" style="margin-top:.5rem">{{ team.unassigned }} open task{{ team.unassigned|pluralize }} in {{ team.name }} {{ team.unassigned|pluralize:"has,have" }} nobody assigned.</p>{% endif %}
+{% empty %}
+<div class="card"><p class="muted" style="margin:0">You are not a team boss of any team yet.</p></div>
+{% endfor %}
+{% endblock %}

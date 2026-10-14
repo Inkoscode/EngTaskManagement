@@ -34,10 +34,12 @@
         {% if t.due_date %}<span {% if t.due_date < today and t.status != 'done' %}class="overdue"{% else %}class="muted"{% endif %}>Due {{ t.due_date|date:"j M" }}</span>{% endif %}
       </div>
       <div class="muted">{{ t.owning_section.name }} · {% if t.assignee %}{{ t.assignee.get_full_name|default:t.assignee.username }}{% else %}Unassigned{% endif %}</div>
+      {% if t.status == 'blocked' and t.blocked_reason %}<div class="reason">Blocked: {{ t.blocked_reason|truncatechars:120 }}</div>{% endif %}
       {% if t.can_status %}
       <form method="post" action="{% url 'task_status' t.pk %}" style="margin-top:.4rem">
         {% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
-        <select name="status" aria-label="Status for {{ t.title }}" onchange="this.form.submit()">
+        <input type="hidden" name="blocked_reason" value="">
+        <select name="status" aria-label="Status for {{ t.title }}" data-current="{{ t.status }}" onchange="portalStatusChange(this)">
           {% for v, l in status_choices %}<option value="{{ v }}" {% if v == t.status %}selected{% endif %}>{{ l }}</option>{% endfor %}
         </select>
         <noscript><button class="btn" type="submit">Save</button></noscript>
@@ -49,4 +51,19 @@
   </section>
   {% endfor %}
 </div>
+<script>
+/* Choosing "Blocked" asks for a reason first. Cancelling puts the old status back. */
+function portalStatusChange(select) {
+  var form = select.form;
+  var reason = form.querySelector('input[name="blocked_reason"]');
+  if (select.value === 'blocked') {
+    var why = window.prompt('Why is this task blocked?');
+    if (!why || !why.trim()) { select.value = select.getAttribute('data-current'); return; }
+    reason.value = why.trim();
+  } else {
+    reason.value = '';
+  }
+  form.submit();
+}
+</script>
 {% endblock %}

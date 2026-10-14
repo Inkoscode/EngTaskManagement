@@ -1,4 +1,4 @@
-{% load static %}<!DOCTYPE html>
+{% load static portal_tags %}<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -18,18 +18,27 @@ a{color:var(--green-700)}
 
 /* Top bar (same as home page) */
 .topbar{background:var(--green-900);color:#fff;position:sticky;top:0;z-index:10}
-.topbar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:12px;font-weight:600;font-size:17px;text-decoration:none;color:#fff}
+.topbar .wrap{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;min-height:64px;flex-wrap:nowrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:20px;text-decoration:none;color:#fff;white-space:nowrap;flex-shrink:0}
 .brand-logo{height:36px;width:auto;max-width:180px;object-fit:contain;display:block;border-radius:6px}
-.nav{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.nav a,.nav button{display:inline-flex;align-items:center;color:#d6eadd;text-decoration:none;font:inherit;font-size:14px;padding:8px 14px;border-radius:6px;background:none;border:0;cursor:pointer}
+.nav{display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-wrap:nowrap;flex:1 1 auto;min-width:0;overflow-x:auto}
+.nav a,.nav button{display:inline-flex;align-items:center;color:#d6eadd;text-decoration:none;font:inherit;font-size:13px;padding:8px 9px;border-radius:6px;background:none;border:0;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .nav a:hover,.nav button:hover{background:rgba(255,255,255,.1);color:#fff}
 .nav a.on{background:rgba(255,255,255,.14);color:#fff}
 .nav .nav-cta{background:var(--green-600);color:#fff;font-weight:600}
 .nav .nav-cta:hover{background:var(--green-700)}
-.nav form{margin:0}
-.nav .who{color:#a9cbb6;font-size:13px;padding:0 8px}
+.nav form{margin:0;flex-shrink:0}
+.nav .who{color:#a9cbb6;font-size:13px;padding:0 6px;white-space:nowrap;flex-shrink:0}
 .nav a:focus-visible,.nav button:focus-visible,.btn:focus-visible{outline:3px solid #86efac;outline-offset:3px}
+
+/* Phone layout */
+@media (max-width:640px){
+.topbar .wrap{flex-wrap:wrap;padding-top:8px;padding-bottom:8px;min-height:0}
+.brand{font-size:18px;max-width:100%}
+.nav{width:100%;flex:1 1 100%;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.nav a,.nav button{white-space:nowrap;flex-shrink:0}
+.nav .who{display:none}
+}
 
 main{flex:1;padding:28px 0 56px}
 h1{font-size:28px;margin:.1rem 0 1rem;color:var(--green-900);letter-spacing:-.3px}
@@ -111,6 +120,54 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
 footer a{color:#d6eadd;text-decoration:none;margin-left:18px}
 footer a:hover{text-decoration:underline}
 
+/* ---------- Added features ---------- */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.bell{position:relative;padding:8px 10px!important}
+.bell svg{display:block}
+.bell-count{position:absolute;top:1px;right:0;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:#d92d20;color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center}
+.tbl th a.sort{color:inherit;text-decoration:none;white-space:nowrap}
+.tbl th a.sort:hover{text-decoration:underline}
+.tbl th a.sort.on{color:var(--green-900)}
+.reason{background:#fee4e2;color:var(--bad);border-radius:6px;padding:.4rem .6rem;font-size:.9em;margin:.4rem 0}
+.banner{background:var(--green-50);border:1px solid var(--line);border-left:4px solid var(--warn);padding:.75rem 1rem;border-radius:8px;margin-bottom:1rem}
+.note{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--white)}
+.note:last-child{border-bottom:0}
+.note.unread{background:var(--green-50);box-shadow:inset 4px 0 0 var(--green-600)}
+.note a{color:var(--ink);font-weight:600;text-decoration:none}
+.note a:hover{text-decoration:underline}
+.note-list{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.load{height:8px;min-width:90px;background:var(--green-100);border-radius:99px}
+.load i{display:block;height:100%;background:var(--green-600);border-radius:99px}
+.tl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--white)}
+.tl{min-width:980px}
+.tl-row{display:grid;grid-template-columns:220px repeat(28,minmax(26px,1fr));align-items:center;min-height:42px;border-bottom:1px solid var(--line);background-image:linear-gradient(to right,var(--line) 1px,transparent 1px);background-size:calc((100% - 220px)/28) 100%;background-position:220px 0;background-repeat:repeat-x}
+.tl-row>*{grid-row:1}
+.tl-label{grid-column:1;position:sticky;left:0;z-index:3;align-self:stretch;display:flex;flex-direction:column;justify-content:center;padding:6px 10px;background:var(--white);border-right:1px solid var(--line);color:var(--ink);text-decoration:none;overflow:hidden}
+a.tl-label:hover b{text-decoration:underline}
+.tl-label b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-label small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-week{grid-column:span 7;padding:6px 8px;font-size:12px;font-weight:600;color:var(--green-800);background:var(--green-50);border-right:1px solid var(--line)}
+.tl-day{text-align:center;font-size:12px;color:var(--muted);padding:4px 0}
+.tl-day.wk{background:var(--green-50)}
+.tl-day.today{background:var(--green-700);color:#fff;font-weight:700;border-radius:4px}
+.tl-group{padding:6px 10px;background:var(--green-100);font-weight:600;color:var(--green-900);border-bottom:1px solid var(--line);position:sticky;left:0}
+.tl-bar{z-index:2;height:24px;margin:0 1px;padding:0 8px;display:flex;align-items:center;border-radius:6px;background:var(--green-600);color:#fff;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-decoration:none}
+.tl-bar.st-todo{background:#6b7f73}
+.tl-bar.st-in_progress{background:var(--green-600)}
+.tl-bar.st-review{background:#b7791f}
+.tl-bar.st-blocked{background:var(--bad)}
+.tl-bar.st-done{background:#9db3a5}
+.tl-bar.cl{border-top-left-radius:0;border-bottom-left-radius:0}
+.tl-bar.cr{border-top-right-radius:0;border-bottom-right-radius:0}
+.tl-due{z-index:2;justify-self:center;width:13px;height:13px;background:var(--green-900);border:2px solid #fff;transform:rotate(45deg)}
+.tl-due.late{background:var(--bad)}
+.tl-today{z-index:1;justify-self:center;width:2px;height:100%;background:var(--green-700);opacity:.55}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin:.5rem 0 1rem;font-size:13px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;vertical-align:middle;margin-right:6px}
+.legend .k-bar{width:26px;height:10px;background:var(--green-600);border-radius:3px}
+.legend .k-due{width:10px;height:10px;background:var(--green-900);transform:rotate(45deg)}
+.legend .k-today{width:2px;height:14px;background:var(--green-700)}
+
 /* ---------- Responsive ---------- */
 /* Large screens: use the extra width for the board and tables */
 @media (min-width:1400px){.wrap{max-width:1320px}}
@@ -134,6 +191,7 @@ footer a:hover{text-decoration:underline}
   main{padding:16px 0 40px}
   h1{font-size:22px}
   .topbar .wrap{padding-top:8px;padding-bottom:8px;min-height:0}
+  .brand{font-size:18px}
   .nav{width:100%;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
   .nav a,.nav button{white-space:nowrap;flex-shrink:0}
   .nav .who{display:none}
@@ -176,11 +234,18 @@ footer a:hover{text-decoration:underline}
 <header class="topbar"><div class="wrap">
   <a class="brand" href="{% url 'home' %}"><img class="brand-logo" src="{% static 'icons/logo.png' %}" alt="">Core Networks Task Management</a>
   <nav class="nav" aria-label="Main navigation">
+    {% unread_notifications user as unread %}{% can_view_workload user as show_workload %}
     <a href="{% url 'task_list' %}" {% if request.resolver_match.url_name == 'task_list' %}class="on"{% endif %}>All teams</a>
     <a href="{% url 'my_dashboard' %}" {% if request.resolver_match.url_name == 'my_dashboard' %}class="on"{% endif %}>My dashboard</a>
+    <a href="{% url 'calendar' %}" {% if request.resolver_match.url_name == 'calendar' %}class="on"{% endif %}>Calendar</a>
+    {% if show_workload %}<a href="{% url 'workload' %}" {% if request.resolver_match.url_name == 'workload' %}class="on"{% endif %}>Workload</a>{% endif %}
     {% if user.is_overall_boss or user.is_staff %}<a href="{% url 'report_list' %}" {% if 'report' in request.resolver_match.url_name %}class="on"{% endif %}>Reports</a>{% endif %}
     {% if user.is_staff %}<a href="{% url 'admin:index' %}">Administration</a>{% endif %}
     {% if user.is_overall_boss or user.memberships.exists %}<a class="nav-cta" href="{% url 'task_create' %}">New task</a>{% endif %}
+    <a class="bell {% if request.resolver_match.url_name == 'notification_list' %}on{% endif %}" href="{% url 'notification_list' %}" aria-label="Notifications{% if unread %}, {{ unread }} unread{% endif %}">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      {% if unread %}<span class="bell-count">{% if unread > 99 %}99+{% else %}{{ unread }}{% endif %}</span>{% endif %}
+    </a>
     <span class="who">{{ user.get_full_name|default:user.username }}</span>
     <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Log out</button></form>
   </nav>
